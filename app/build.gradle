@@ -14,7 +14,7 @@ android {
     compileSdk 33
 
     defaultConfig {
-        applicationId "lu.fisch.canze"
+        applicationId "lu.fisch.canze.mscg"
         minSdkVersion 21
         versionName '1.68beta2'
         versionCode 102

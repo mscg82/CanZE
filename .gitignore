@@ -7,6 +7,9 @@
 /.idea/tasks.xml
 /.idea/assetWizardSettings.xml
 /.idea/caches/
+/.idea/.gitignore
+/.idea/deploymentTargetDropDown.xml
+/.idea/migrations.xml
 /projectFilesBackup/
 gradle.xml
 /app/google-services.json
