@@ -158,6 +158,14 @@
                 custom:intermediateColor="?android:attr/colorForeground"
                 />
 
+        </TableRow>
+
+        <TableRow
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:orientation="horizontal"
+            android:layout_weight="1">
+
             <lu.fisch.canze.widgets.WidgetView
                 android:layout_width="0dp"
                 android:layout_weight="1"
@@ -191,7 +199,6 @@
                 custom:foregroundColor="?android:attr/colorForeground"
                 custom:intermediateColor="?android:attr/colorForeground"
                 />
-
 
         </TableRow>
 <!--
