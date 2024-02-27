@@ -296,10 +296,12 @@ public class DrivingActivity extends CanzeActivity implements FieldListener, Deb
                         pb = findViewById(R.id.MeanEffectiveAccTorque);
                         pb.setProgress((int)field.getValue()); // --> translate from motor torque to wheel torque
                         break;
-                    case Sid.EVC_Odometer:
-                        odo = (float) field.getValue();
+                    case Sid.EVC_Odometer: {
+                        float odoValue = (float) field.getValue();
+                        odo = Float.isNaN(odoValue) ? 0.0f : odoValue;
                         tv = null;
                         break;
+                    }
                     case Sid.TripMeterB:
                         tripBdistance = (float) field.getValue();
                         tripDistance = tripBdistance - startBdistance;
