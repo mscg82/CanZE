@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">CanZE</string>
+    <string name="app_name">CanZE MscG Edition</string>
     <string name="action_settings">Настройки</string>
     <string name="build">Сборка:</string>
     <string name="button_AllData">Все данные</string>
