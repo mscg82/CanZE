@@ -22,6 +22,7 @@
 package lu.fisch.canze.widgets;
 
 import android.content.res.Resources;
+import android.text.style.AbsoluteSizeSpan;
 import android.util.TypedValue;
 
 import com.google.gson.Gson;
@@ -32,6 +33,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Locale;
 
 import lu.fisch.awt.Color;
@@ -269,23 +271,24 @@ public class Timeplot extends Drawable {
             }
         }
 
-
         // draw the graph
         for (int s = 0; s < sids.size(); s++) {
             String sid = sids.get(s);
-            //ArrayList<TimePoint> tmpValues = this.values.get(sid);
-            // make a shallow copy. this avoids array size changes and thus out of bounds while drawing
-            ArrayList<TimePoint> tmpValues = new ArrayList<>(this.values.get(sid));
 
+            ArrayList<TimePoint> tmpValues;
             // setup an empty list if no list has been found
-            if (tmpValues == null) {
+            ArrayList<TimePoint> values = this.values.get(sid);
+            if (values == null) {
                 tmpValues = new ArrayList<>();
                 this.values.put(sid, tmpValues);
+            } else {
+                // make a shallow copy. this avoids array size changes and thus out of bounds while drawing
+                tmpValues = new ArrayList<>(values);
             }
 
             g.setColor(getForeground());
             g.drawRect(x + width - barWidth - spaceAlt, y, barWidth, graphHeight);
-            if (tmpValues.size() > 0) {
+            if (!tmpValues.isEmpty()) {
 
                 double w = (double) barWidth / tmpValues.size();
                 double h = (double) graphHeight / (getMax() - getMin());
@@ -331,18 +334,12 @@ public class Timeplot extends Drawable {
 
                                     // parse out position of line
                                     String options = getOptions().getOption(sid);
-                                    int index = options.indexOf("colorline");
-                                    index += ("colorline").length() + 1;
-                                    String value = "";
-                                    while (index < options.length() && options.charAt(index) != ']') {
-                                        value += options.charAt(index);
-                                        index++;
-                                    }
+                                    double value = getValueForColorline(options);
                                     if (getOptions().getOption(sid) != null &&
                                             getOptions().getOption(sid).contains("alt"))
-                                        my = graphHeight - (Double.parseDouble(value) - minAlt) * hAlt;
+                                        my = graphHeight - (value - minAlt) * hAlt;
                                     else
-                                        my = graphHeight - (Double.parseDouble(value) - min) * h;
+                                        my = graphHeight - (value - min) * h;
                                 }
 
                                 // now get ZY
@@ -427,7 +424,7 @@ public class Timeplot extends Drawable {
                         if (tp != null && !Double.isNaN(tp.value) && tp.date != 0) {
                             g.setColor(colorRanges.getColor(sid, tp.value, getColor(s)));
 
-                            double mx = ((tp.date - minTime) / timeSale / 1000.0);
+                            double mx = (((double) (tp.date - minTime)) / timeSale / 1000.0);
 
                             if (mx <= barWidth) {
                                 // ignore point that are out of scope but do not delete them
@@ -440,14 +437,8 @@ public class Timeplot extends Drawable {
 
                                     // parse out position of line
                                     String options = getOptions().getOption(sid);
-                                    int index = options.indexOf("colorline");
-                                    index += ("colorline").length() + 1;
-                                    String value = "";
-                                    while (index < options.length() && options.charAt(index) != ']') {
-                                        value += options.charAt(index);
-                                        index++;
-                                    }
-                                    my = graphHeight - (Double.parseDouble(value) - min) * h;
+                                    double value = getValueForColorline(options);
+                                    my = graphHeight - (value - min) * h;
                                 }
 
                                 double zy = graphHeight - (-min) * h;
@@ -598,10 +589,8 @@ public class Timeplot extends Drawable {
         // draw the title
         if (title != null && !title.equals("")) {
             g.setColor(getTitleColor());
-            if (MainActivity.getInstance().isLandscape())
-                g.setTextSize(TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 14, Resources.getSystem().getDisplayMetrics()));
-            else
-                g.setTextSize(TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 10, Resources.getSystem().getDisplayMetrics()));
+            Sizes sizes = new Sizes(getOptions().getOption("titleSize"), 14, 10);
+            g.setTextSize(TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, sizes.getSize(), Resources.getSystem().getDisplayMetrics()));
 
             // draw multi-line title
             title = title.replace(" / ", ", "); // let's be lazy
@@ -610,8 +599,9 @@ public class Timeplot extends Drawable {
             for (int s = 0; s < sids.size(); s++) {
                 String sid = sids.get(s);
                 //ArrayList<TimePoint> tmpValues = this.values.get(sid);tmpValues =
-                ArrayList<TimePoint> tmpValues = new ArrayList<>(this.values.get(sid));
-                if (tmpValues == null) continue;
+                ArrayList<TimePoint> values = this.values.get(sid);
+                if (values == null) continue;
+                ArrayList<TimePoint> tmpValues = new ArrayList<>(values);
 
                 int th = g.stringHeight(title);
                 int ty = getY() + th + 4;
@@ -645,11 +635,8 @@ public class Timeplot extends Drawable {
 
         // draw the value
         if (showValue) {
-            //g.setTextSize(40);
-            if (MainActivity.getInstance().isLandscape())
-                g.setTextSize(TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 22, Resources.getSystem().getDisplayMetrics()));
-            else
-                g.setTextSize(TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 18, Resources.getSystem().getDisplayMetrics()));
+            Sizes sizes = new Sizes(getOptions().getOption("valueSize"), 22, 18);
+            g.setTextSize(TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, sizes.getSize(), Resources.getSystem().getDisplayMetrics()));
 
             int tx = getX() + width - 8 - spaceAlt;
             int ty = getY();
@@ -657,8 +644,9 @@ public class Timeplot extends Drawable {
             for (int s = 0; s < sids.size(); s++) {
                 String sid = sids.get(s);
                 // ArrayList<TimePoint> tmpValues = this.values.get(sid);
-                ArrayList<TimePoint> tmpValues = new ArrayList<>(this.values.get(sid));
-                if (tmpValues == null) continue;
+                ArrayList<TimePoint> values = this.values.get(sid);
+                if (values == null) continue;
+                ArrayList<TimePoint> tmpValues = new ArrayList<>(values);
 
                 Field field = Fields.getInstance().getBySID(sid);
 
@@ -686,6 +674,17 @@ public class Timeplot extends Drawable {
         // black border
         g.setColor(getForeground());
         g.drawRect(x, y, width, height);
+    }
+
+    private static double getValueForColorline(String options) {
+        int index = options.indexOf("colorline");
+        index += ("colorline").length() + 1;
+        int startIndex = index;
+        while (options.charAt(index) != ']') {
+            index++;
+        }
+        String valueStr = options.substring(startIndex, index);
+        return Double.parseDouble(valueStr);
     }
 
     @Override
@@ -753,5 +752,28 @@ public class Timeplot extends Drawable {
         // test for origin (close to 0, 0 to find tringle problem)
         // MainActivity.toast ("x:" + x + ", y:" + y + ", " + er);
         return x >= -maxdelta && x <= maxdelta && y >= -maxdelta && y <= maxdelta;
+    }
+
+    private static class Sizes {
+        private final int landscape;
+        private final int portrait;
+
+        public Sizes(String source, int defaultLandscape, int defaultPortrait) {
+            if (source != null && !source.trim().isEmpty()) {
+                String[] parts = source.split(",");
+                if (parts.length == 2) {
+                    landscape = Integer.parseInt(parts[0].trim());
+                    portrait = Integer.parseInt(parts[1].trim());
+                    return;
+                }
+            }
+
+            landscape = defaultLandscape;
+            portrait = defaultPortrait;
+        }
+
+        public int getSize() {
+            return MainActivity.getInstance().isLandscape() ? landscape : portrait;
+        }
     }
 }

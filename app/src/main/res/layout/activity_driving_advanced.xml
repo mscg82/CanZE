@@ -152,6 +152,7 @@
                 custom:axisMinY="0"
                 custom:minorTicks="500"
                 custom:options="{
+                                   'valueSize':'24,20',
                                    '764.6144.107':'gradient',
                                    '764.6143.86':'colorline[6800],dot'
                                 }"
@@ -175,7 +176,6 @@
     <lu.fisch.canze.widgets.WidgetView
         android:layout_width="fill_parent"
         android:layout_height="0dip"
-        android:layout_marginTop="0dp"
         android:layout_weight="1"
         custom:backgroundColor="?android:attr/colorBackground"
         custom:colorRanges="[
@@ -189,6 +189,9 @@
                                    '800.6105.24':2000,
                                    '42e.44':10000
                                    }"
+        custom:options="{
+            'valueSize':'24,20'
+            }"
         custom:majorTicks="10"
         custom:axisMaxY="40"
         custom:axisMinY="-10"
@@ -205,9 +208,8 @@
 
     <lu.fisch.canze.widgets.WidgetView
         android:layout_width="fill_parent"
-        android:layout_weight="1"
         android:layout_height="0dip"
-        android:layout_marginBottom="8dp"
+        android:layout_weight="2"
         custom:axisMinY="0"
         custom:axisMaxY="25,16:56,64:45,128:45"
         custom:axisMinYAlt="-30"
@@ -221,7 +223,11 @@
                 {'sid':'427.49','color':'#3ee9ff','from':0,'to':8},
                 {'sid':'427.49','color':'#008a1d','from':8,'to':17},
                 {'sid':'427.49','color':'#ffaa17','from':17,'to':25}]"
-        custom:options="{'427.49':'gradient', '800.6104.24':'alt', '800.6109.24':'alt'}"
+        custom:options="{
+            'valueSize':'24,20',
+            '800.6104.24':'alt',
+            '800.6109.24':'alt'
+            }"
         custom:timeScale="4"
         custom:intervals="{'427.49':10000}"
         custom:backgroundColor="?android:attr/colorBackground"
@@ -234,6 +240,7 @@
     <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
         android:orientation="horizontal">
 
         <TextView
