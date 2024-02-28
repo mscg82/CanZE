@@ -66,20 +66,10 @@ public class DrivingActivity extends CanzeActivity implements FieldListener, Deb
         setContentView(R.layout.activity_driving);
 
         final TextView distkmToDest = findViewById(R.id.LabelDistToDest);
-        distkmToDest.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                setDistanceToDestination();
-            }
-        });
+        distkmToDest.setOnClickListener(v -> setDistanceToDestination());
 
         final TextView tripConsumption = findViewById(R.id.LabelTripConsumption);
-        tripConsumption.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                setSavedTripStart();
-            }
-        });
+        tripConsumption.setOnClickListener(v -> setSavedTripStart());
 
         if (MainActivity.milesMode) {
             TextView tv;
@@ -129,42 +119,36 @@ public class DrivingActivity extends CanzeActivity implements FieldListener, Deb
                 .setMessage(MainActivity.getStringSingle(R.string.prompt_SetDistance))
 
                 .setCancelable(true)
-                .setPositiveButton(R.string.default_Ok, new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int id) {
-                        InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-                        if (imm != null) imm.toggleSoftInput(InputMethodManager.SHOW_IMPLICIT, 0);
-                        EditText dialogDistToDest = distToDestView.findViewById(R.id.dialog_dist_to_dest);
-                        if (dialogDistToDest != null) {
-                            try {
-                                saveDestOdo(odo + Integer.parseInt(dialogDistToDest.getText().toString()));
-                            } catch (NumberFormatException e) {
-                                /* do nothing if nonsense is entered */
-                            }
+                .setPositiveButton(R.string.default_Ok, (dialog, id) -> {
+                    InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+                    if (imm != null) imm.toggleSoftInput(InputMethodManager.SHOW_IMPLICIT, 0);
+                    EditText dialogDistToDest = distToDestView.findViewById(R.id.dialog_dist_to_dest);
+                    if (dialogDistToDest != null) {
+                        try {
+                            saveDestOdo(odo + Integer.parseInt(dialogDistToDest.getText().toString()));
+                        } catch (NumberFormatException e) {
+                            /* do nothing if nonsense is entered */
                         }
-                        dialog.cancel();
                     }
+                    dialog.cancel();
                 })
-                .setNeutralButton(R.string.button_Double, new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int id) {
-                        InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-                        if (imm != null) imm.toggleSoftInput(InputMethodManager.SHOW_IMPLICIT, 0);
-                        EditText dialogDistToDest = distToDestView.findViewById(R.id.dialog_dist_to_dest);
-                        if (dialogDistToDest != null) {
-                            try {
-                                saveDestOdo(odo + 2 * Integer.parseInt(dialogDistToDest.getText().toString()));
-                            } catch (NumberFormatException e) {
-                                /* do nothing if nonsense is entered */
-                            }
+                .setNeutralButton(R.string.button_Double, (dialog, id) -> {
+                    InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+                    if (imm != null) imm.toggleSoftInput(InputMethodManager.SHOW_IMPLICIT, 0);
+                    EditText dialogDistToDest = distToDestView.findViewById(R.id.dialog_dist_to_dest);
+                    if (dialogDistToDest != null) {
+                        try {
+                            saveDestOdo(odo + 2 * Integer.parseInt(dialogDistToDest.getText().toString()));
+                        } catch (NumberFormatException e) {
+                            /* do nothing if nonsense is entered */
                         }
-                        dialog.cancel();
                     }
+                    dialog.cancel();
                 })
-                .setNegativeButton(R.string.default_Cancel, new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int id) {
-                        InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-                        if (imm != null) imm.toggleSoftInput(InputMethodManager.SHOW_IMPLICIT, 0);
-                        dialog.cancel();
-                    }
+                .setNegativeButton(R.string.default_Cancel, (dialog, id) -> {
+                    InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+                    if (imm != null) imm.toggleSoftInput(InputMethodManager.SHOW_IMPLICIT, 0);
+                    dialog.cancel();
                 });
 
         // create alert dialog
