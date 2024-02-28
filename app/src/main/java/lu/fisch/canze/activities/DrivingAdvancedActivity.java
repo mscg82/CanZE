@@ -27,42 +27,35 @@ import android.widget.TextView;
 import java.util.Locale;
 
 import lu.fisch.canze.R;
-import lu.fisch.canze.classes.Sid;
 import lu.fisch.canze.actors.Field;
+import lu.fisch.canze.classes.Sid;
 import lu.fisch.canze.interfaces.DebugListener;
 import lu.fisch.canze.interfaces.FieldListener;
 
 // If you want to monitor changes, you must add a FieldListener to the fields.
 // For the simple activity, the easiest way is to implement it in the activity itself.
-public class ClimaTechActivity extends CanzeActivity implements FieldListener, DebugListener {
-    
+public class DrivingAdvancedActivity extends CanzeActivity implements FieldListener, DebugListener {
+
     private final String[] cooling_Status = MainActivity.getStringList(R.array.list_CoolingStatus);
-    private final String[] conditioning_Status = MainActivity.getStringList (MainActivity.isPh2() ? R.array.list_ConditioningStatusPh2
-                                                                                                  : R.array.list_ConditioningStatus);
+    private final String[] conditioning_Status = MainActivity.getStringList(MainActivity.isPh2() ? R.array.list_ConditioningStatusPh2
+            : R.array.list_ConditioningStatus);
     private final String[] climate_Status = MainActivity.getStringList(MainActivity.isPh2() ? R.array.list_ClimateStatusPh2
-                                                                                            : R.array.list_ClimateStatus);
-    private final String[] ptc_Relay = MainActivity.getStringList(R.array.list_PtcRelay);
+            : R.array.list_ClimateStatus);
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_climatech);
+        setContentView(R.layout.activity_driving_advanced);
     }
 
     protected void initListeners() {
         MainActivity.getInstance().setDebugListener(this);
-        //if (MainActivity.isZOE()) {
-            addField(Sid.EngineFanSpeed, 0);
-            // addListener(Sid.ChargingPower);
-            addField(Sid.HvCoolingState, 0);
-            addField(Sid.HvEvaporationTemp, 10000);
-            addField(Sid.Pressure, 1000);
-            addField(Sid.BatteryConditioningMode, 0);
-            addField(Sid.ClimaLoopMode, 0);
-            //addField(Sid.PtcRelay1, 1000);
-            //addField(Sid.PtcRelay2, 1000);
-            //addField(Sid.PtcRelay3, 1000);
-        //}
+        addField(Sid.EngineFanSpeed, 0);
+        addField(Sid.HvCoolingState, 0);
+        addField(Sid.HvEvaporationTemp, 10000);
+        addField(Sid.Pressure, 1000);
+        addField(Sid.BatteryConditioningMode, 0);
+        addField(Sid.ClimaLoopMode, 0);
 
         TextView tv = findViewById(R.id.textLabel_climatePower);
         if (MainActivity.isPh2()) {
@@ -92,12 +85,12 @@ public class ClimaTechActivity extends CanzeActivity implements FieldListener, D
                 case Sid.EngineFanSpeed:
                     tv = findViewById(R.id.text_EFS);
                     break;
+
                 case Sid.DcPowerOut:
+                case Sid.ThermalComfortPower:
                     tv = findViewById(R.id.text_ClimatePower);
                     break;
-                // case Sid.ChargingPower:
-                //     tv = (TextView) findViewById(R.id.text_CPO);
-                //     break;
+
                 case Sid.HvCoolingState:
                     value = (int) field.getValue();
                     tv = findViewById(R.id.text_HCS);
@@ -105,12 +98,15 @@ public class ClimaTechActivity extends CanzeActivity implements FieldListener, D
                         tv.setText(cooling_Status[value]);
                     tv = null;
                     break;
+
                 case Sid.HvEvaporationTemp:
                     tv = findViewById(R.id.text_HET);
                     break;
+
                 case Sid.Pressure:
                     tv = findViewById(R.id.text_PRE);
                     break;
+
                 case Sid.BatteryConditioningMode:
                     value = (int) field.getValue();
                     tv = findViewById(R.id.text_HCM);
@@ -118,6 +114,7 @@ public class ClimaTechActivity extends CanzeActivity implements FieldListener, D
                         tv.setText(conditioning_Status[value]);
                     tv = null;
                     break;
+
                 case Sid.ClimaLoopMode:
                     value = (int) field.getValue();
                     tv = findViewById(R.id.text_CLM);
@@ -125,39 +122,11 @@ public class ClimaTechActivity extends CanzeActivity implements FieldListener, D
                         tv.setText(climate_Status[value]);
                     tv = null;
                     break;
-                case Sid.ThermalComfortPower:
-                     tv = findViewById(R.id.text_ClimatePower);
-                     break;
-                //case Sid.PtcRelay1:
-                //    value = (int) field.getValue();
-                //    tv = findViewById(R.id.text_PTC1);
-                //    if (tv != null && ptc_Relay != null && value >= 0 && value < ptc_Relay.length)
-                //        tv.setText(ptc_Relay[value]);
-                //    tv = null;
-                //    break;
-                //case Sid.PtcRelay2:
-                //    value = (int) field.getValue();
-                //    tv = findViewById(R.id.text_PTC2);
-                //    if (tv != null && ptc_Relay != null && value >= 0 && value < ptc_Relay.length)
-                //        tv.setText(ptc_Relay[value]);
-                //    tv = null;
-                //    break;
-                //case Sid.PtcRelay3:
-                //    value = (int) field.getValue();
-                //    tv = findViewById(R.id.text_PTC3);
-                //    if (tv != null && ptc_Relay != null && value >= 0 && value < ptc_Relay.length)
-                //        tv.setText(ptc_Relay[value]);
-                //    tv = null;
-                //    break;
-
             }
-            // set regular new content, all exeptions handled above
+            // set regular new content, all exceptions handled above
             if (tv != null) {
                 tv.setText(String.format(Locale.getDefault(), "%.1f", field.getValue()));
             }
-
-            //tv = (TextView) findViewById(R.id.textDebug);
-            //tv.setText(fieldId);
         });
 
     }

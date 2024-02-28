@@ -507,6 +507,8 @@
     <string name="graph_PilotPower">Charge pilot amp (A), Charging power (kW)</string>
     <string name="graph_MaxRealChPwr">Max battery charge (kW) / DC charging power (kW)</string>
     <string name="graph_EnergyTemperature">Available energy (kWh), temperature (°C)</string>
+    <string name="graph_EnergyAdvancedTitle" translatable="false">Energy and power info</string>
+    <string name="graph_EnergyAdvanced" translatable="false">Available energy (kWh), Consumption (kWh/100km), Power (kW)</string>
 
     <!-- Charging history -->
 
@@ -629,7 +631,9 @@
     <!-- Driving -->
 
     <string name="title_activity_driving">Driving info</string>
+    <string name="title_activity_driving_advanced" translatable="false">Advanced driving info</string>
     <string name="button_Driving">Driving</string>
+    <string name="button_Driving_advanced" translatable="false">Advanced driving</string>
     <string name="label_pedal">Pedal position</string>
     <string name="label_wheel_torque">Wheel Torque</string>
     <string name="label_DistToDest">Distance to destination</string>

@@ -73,6 +73,9 @@
             android:name=".activities.DrivingActivity"
             android:label="@string/title_activity_driving" />
         <activity
+            android:name=".activities.DrivingAdvancedActivity"
+            android:label="@string/title_activity_driving_advanced" />
+        <activity
             android:name=".activities.BrakingActivity"
             android:label="@string/title_activity_braking" />
         <activity

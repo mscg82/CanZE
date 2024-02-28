@@ -1,0 +1,252 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:custom="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:keepScreenOn="true"
+    android:orientation="vertical"
+    android:paddingLeft="@dimen/activity_horizontal_margin"
+    android:paddingTop="@dimen/activity_vertical_margin"
+    android:paddingRight="@dimen/activity_horizontal_margin"
+    android:paddingBottom="@dimen/activity_vertical_margin"
+    tools:context="lu.fisch.canze.activities.ChargingTechActivity">
+
+    <TableLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <TableRow>
+
+            <TextView
+                android:layout_weight="0.7"
+                android:width="0dp"
+                android:text="@string/label_EngineFanSpeed" />
+
+            <TextView
+                android:id="@+id/text_EFS"
+                android:layout_weight="0.3"
+                android:width="0dp"
+                android:gravity="end"
+                android:text="@string/default_Dash" />
+        </TableRow>
+
+        <TableRow
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <TextView
+                android:id="@+id/textLabel_climatePower"
+                android:layout_weight="0.7"
+                android:width="0dp" />
+
+            <TextView
+                android:id="@+id/text_ClimatePower"
+                android:layout_weight="0.3"
+                android:width="0dp"
+                android:gravity="end"
+                android:text="@string/default_Dash" />
+        </TableRow>
+
+        <TableRow>
+
+            <TextView
+                android:layout_weight="0.7"
+                android:width="0dp"
+                android:text="@string/label_HVCoolingState" />
+
+            <TextView
+                android:id="@+id/text_HCS"
+                android:layout_weight="0.3"
+                android:width="0dp"
+                android:gravity="end"
+                android:text="@string/default_Dash" />
+        </TableRow>
+
+        <TableRow>
+
+            <TextView
+                android:layout_weight="0.7"
+                android:width="0dp"
+                android:text="@string/label_HVEvaporationTemp" />
+
+            <TextView
+                android:id="@+id/text_HET"
+                android:layout_weight="0.3"
+                android:width="0dp"
+                android:gravity="end"
+                android:text="@string/default_Dash" />
+        </TableRow>
+
+        <TableRow>
+
+            <TextView
+                android:layout_weight="0.7"
+                android:width="0dp"
+                android:text="@string/label_ACPressure" />
+
+            <TextView
+                android:id="@+id/text_PRE"
+                android:layout_weight="0.3"
+                android:width="0dp"
+                android:gravity="end"
+                android:text="@string/default_Dash" />
+        </TableRow>
+
+        <TableRow>
+
+            <TextView
+                android:layout_weight="0.7"
+                android:width="0dp"
+                android:text="@string/label_HVBatConditioningMode" />
+
+            <TextView
+                android:id="@+id/text_HCM"
+                android:layout_weight="0.3"
+                android:width="0dp"
+                android:gravity="end"
+                android:text="@string/default_Dash" />
+        </TableRow>
+
+        <TableRow>
+
+            <TextView
+                android:layout_weight="0.7"
+                android:width="0dp"
+                android:text="@string/label_ClimaLoopMode" />
+
+            <TextView
+                android:id="@+id/text_CLM"
+                android:layout_weight="0.3"
+                android:width="0dp"
+                android:gravity="end"
+                android:text="@string/default_Dash" />
+        </TableRow>
+
+        <TableRow
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:layout_weight="1"
+            android:orientation="horizontal">
+
+            <lu.fisch.canze.widgets.WidgetView
+                android:layout_width="0dp"
+                android:layout_height="100dp"
+                android:layout_marginTop="8dp"
+                android:layout_marginBottom="0dp"
+                android:layout_weight="1"
+                custom:backgroundColor="?android:attr/colorBackground"
+                custom:fieldSID="764.6144.107,764.6143.86"
+                custom:intervals="{
+                                   }"
+                custom:colorRanges="[
+                    {'sid':'764.6144.107','color':'#008a1d','from':0,'to':1500},
+                    {'sid':'764.6144.107','color':'#ffaa17','from':1500,'to':3000},
+                    {'sid':'764.6144.107','color':'#FF0000','from':3000,'to':4500},
+                    {'sid':'764.6144.107','color':'#cc00ff','from':4500,'to':6000},
+                    {'sid':'764.6143.86','color':'#008a1d','from':1,'to':1},
+                    {'sid':'764.6143.86','color':'#ffffff','from':2,'to':2}
+                    ]"
+                custom:foregroundColor="?android:attr/colorForeground"
+                custom:majorTicks="1000"
+                custom:axisMaxY="7000"
+                custom:axisMinY="0"
+                custom:minorTicks="500"
+                custom:options="{
+                                   '764.6144.107':'gradient',
+                                   '764.6143.86':'colorline[6800],dot'
+                                }"
+                custom:text="@string/label_IH_ClimCompPWRStatus"
+                custom:widget="timeplot" />
+
+        </TableRow>
+
+    </TableLayout>
+
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="6dp"
+        android:text="@string/label_Temperatures"
+        android:textStyle="bold" />
+
+    <!-- use widget as filler -->
+
+    <lu.fisch.canze.widgets.WidgetView
+        android:layout_width="fill_parent"
+        android:layout_height="0dip"
+        android:layout_marginTop="0dp"
+        android:layout_weight="1"
+        custom:backgroundColor="?android:attr/colorBackground"
+        custom:colorRanges="[
+                    {'sid':'42e.44','color':'#808080','from':-100,'to':100},
+                    {'sid':'764.6121.26','color':'?android:attr/colorForeground','from':-40,'to':100}]"
+        custom:fieldSID="764.6143.110,764.6121.26,800.6105.24,42e.44"
+        custom:foregroundColor="?android:attr/colorForeground"
+        custom:intervals="{
+                                   '764.6143.110':10000,
+                                   '764.6121.26':10000,
+                                   '800.6105.24':2000,
+                                   '42e.44':10000
+                                   }"
+        custom:majorTicks="10"
+        custom:axisMaxY="40"
+        custom:axisMinY="-10"
+        custom:minorTicks="2"
+        custom:text="@string/graph_Climatech"
+        custom:widget="timeplot" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="6dp"
+        android:text="@string/graph_EnergyAdvancedTitle"
+        android:textStyle="bold" />
+
+    <lu.fisch.canze.widgets.WidgetView
+        android:layout_width="fill_parent"
+        android:layout_weight="1"
+        android:layout_height="0dip"
+        android:layout_marginBottom="8dp"
+        custom:axisMinY="0"
+        custom:axisMaxY="25,16:56,64:45,128:45"
+        custom:axisMinYAlt="-30"
+        custom:axisMaxYAlt="70"
+        custom:majorTicks="5"
+        custom:minorTicks="1"
+        custom:fieldSID="427.49,800.6104.24,800.6109.24"
+        custom:widget="timeplot"
+        custom:text="@string/graph_EnergyAdvanced"
+        custom:colorRanges="[
+                {'sid':'427.49','color':'#3ee9ff','from':0,'to':8},
+                {'sid':'427.49','color':'#008a1d','from':8,'to':17},
+                {'sid':'427.49','color':'#ffaa17','from':17,'to':25}]"
+        custom:options="{'427.49':'gradient', '800.6104.24':'alt', '800.6109.24':'alt'}"
+        custom:timeScale="4"
+        custom:intervals="{'427.49':10000}"
+        custom:backgroundColor="?android:attr/colorBackground"
+        custom:foregroundColor="?android:attr/colorForeground"
+        />
+
+
+    <!-- debug line -->
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/label_debug" />
+
+        <TextView
+            android:id="@+id/textDebug"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/default_debug" />
+
+    </LinearLayout>
+
+</LinearLayout>

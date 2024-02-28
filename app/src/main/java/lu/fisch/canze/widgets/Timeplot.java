@@ -109,9 +109,19 @@ public class Timeplot extends Drawable {
     }
 
     private Color getColor(int i) {
-        if (i == 0) return Color.RENAULT_RED;
-        else if (i == 1) return Color.BLUE;
-        else return Color.GREEN_DARK;
+        switch (i) {
+            case 0:
+                return Color.RENAULT_RED;
+
+            case 1:
+                return Color.WHITE;
+
+            case 2:
+                return Color.GREEN;
+
+            default:
+                return Color.GRAY;
+        }
     }
 
     @Override
@@ -126,8 +136,8 @@ public class Timeplot extends Drawable {
 
         // calculate fill height
         //int fillHeight = (int) ((value-min)/(double)(max-min)*(height-1));
-        int barWidth = width - Math.max(g.stringWidth(min + ""), g.stringWidth(max + "")) - 10 - 10;
-        int spaceAlt = Math.max(g.stringWidth(minAlt + ""), g.stringWidth(maxAlt + "")) + 10 + 10;
+        int barWidth = width - Math.max(g.stringWidth(String.valueOf(min)), g.stringWidth(String.valueOf(max))) - 10 - 10;
+        int spaceAlt = Math.max(g.stringWidth(String.valueOf(minAlt)), g.stringWidth(String.valueOf(maxAlt))) + 10 + 10;
         // reduce with if second y-axe is used
         //MainActivity.debug("Alt: "+minAlt+" - "+maxAlt);
         if (minAlt == 0 && maxAlt == 0) {
@@ -339,9 +349,9 @@ public class Timeplot extends Drawable {
                                 double zy;
                                 if (getOptions().getOption(sid) != null &&
                                         getOptions().getOption(sid).contains("alt"))
-                                    zy = graphHeight - (- minAlt) * hAlt;
+                                    zy = graphHeight - (-minAlt) * hAlt;
                                 else
-                                    zy = graphHeight - (- min) * h;
+                                    zy = graphHeight - (-min) * h;
 
                                 int rayon = 2;
 
@@ -440,13 +450,13 @@ public class Timeplot extends Drawable {
                                     my = graphHeight - (Double.parseDouble(value) - min) * h;
                                 }
 
-                                double zy = graphHeight - (- min) * h;
+                                double zy = graphHeight - (-min) * h;
 
                                 // draw on alternate scale if requested
                                 if (getOptions().getOption(sid) != null &&
                                         getOptions().getOption(sid).contains("alt")) {
                                     my = graphHeight - (tp.value - minAlt) * hAlt;
-                                    zy = graphHeight - (- minAlt) * hAlt;
+                                    zy = graphHeight - (-minAlt) * hAlt;
                                 }
 
                                 int rayon = 2;

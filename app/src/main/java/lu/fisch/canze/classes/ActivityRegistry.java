@@ -20,6 +20,7 @@ import lu.fisch.canze.activities.ClimaTechActivity;
 import lu.fisch.canze.activities.ConsumptionActivity;
 import lu.fisch.canze.activities.DashActivity;
 import lu.fisch.canze.activities.DrivingActivity;
+import lu.fisch.canze.activities.DrivingAdvancedActivity;
 import lu.fisch.canze.activities.DtcActivity;
 import lu.fisch.canze.activities.ElmTestActivity;
 import lu.fisch.canze.activities.FieldTestActivity;
@@ -42,30 +43,31 @@ public class ActivityRegistry {
 
     private static ActivityRegistry registry = null;
 
-    public static final int ACTIVITY_CONSUMPTION          = 0;
-    public static final int ACTIVITY_CHARGING             = 1;
-    public static final int ACTIVITY_BATTERY              = 2;
-    public static final int ACTIVITY_DRIVING              = 3;
-    public static final int ACTIVITY_CLIMATE              = 4;
-    public static final int ACTIVITY_BRAKING              = 5;
-    public static final int ACTIVITY_AVERAGE_SPEED        = 6;
-    public static final int ACTIVITY_CHARGING_TECH        = 7;
-    public static final int ACTIVITY_DTC_READOUT          = 8;
-    public static final int ACTIVITY_CHARGING_GRAPHS      = 9;
-    public static final int ACTIVITY_FIRMWARE             = 10;
-    public static final int ACTIVITY_CHARGING_PREDICTION  = 11;
-    public static final int ACTIVITY_ELM_TESTING          = 12;
-    public static final int ACTIVITY_CHARGING_HISTORY     = 13;
-    public static final int ACTIVITY_12_VOLT_BATT         = 14;
-    public static final int ACTIVITY_LEAK_CURRENTS        = 15;
-    public static final int ACTIVITY_TIRES                = 16;
-    public static final int ACTIVITY_VOLTAGE_HEATMAP      = 17;
-    public static final int ACTIVITY_TEMPERATURE_HEATMAP  = 18;
-    public static final int ACTIVITY_RANGE                = 19;
-    public static final int ACTIVITY_ALL_DATA             = 20;
-    public static final int ACTIVITY_DASH                 = 21;
-    public static final int ACTIVITY_RESEARCH             = 22;
-    public static final int ACTIVITY_FIELD_TEST           = 23;
+    public static final int ACTIVITY_CONSUMPTION = 0;
+    public static final int ACTIVITY_CHARGING = 1;
+    public static final int ACTIVITY_BATTERY = 2;
+    public static final int ACTIVITY_DRIVING = 3;
+    public static final int ACTIVITY_CLIMATE = 4;
+    public static final int ACTIVITY_BRAKING = 5;
+    public static final int ACTIVITY_AVERAGE_SPEED = 6;
+    public static final int ACTIVITY_CHARGING_TECH = 7;
+    public static final int ACTIVITY_DTC_READOUT = 8;
+    public static final int ACTIVITY_CHARGING_GRAPHS = 9;
+    public static final int ACTIVITY_FIRMWARE = 10;
+    public static final int ACTIVITY_CHARGING_PREDICTION = 11;
+    public static final int ACTIVITY_ELM_TESTING = 12;
+    public static final int ACTIVITY_CHARGING_HISTORY = 13;
+    public static final int ACTIVITY_12_VOLT_BATT = 14;
+    public static final int ACTIVITY_LEAK_CURRENTS = 15;
+    public static final int ACTIVITY_TIRES = 16;
+    public static final int ACTIVITY_VOLTAGE_HEATMAP = 17;
+    public static final int ACTIVITY_TEMPERATURE_HEATMAP = 18;
+    public static final int ACTIVITY_RANGE = 19;
+    public static final int ACTIVITY_ALL_DATA = 20;
+    public static final int ACTIVITY_DASH = 21;
+    public static final int ACTIVITY_RESEARCH = 22;
+    public static final int ACTIVITY_FIELD_TEST = 23;
+    public static final int ACTIVITY_DRIVING_ADVANCED = 24;
 
     public static final int[] ACTIVITIES_MAIN = {
             ACTIVITY_CONSUMPTION,
@@ -98,8 +100,7 @@ public class ActivityRegistry {
             ACTIVITY_FIELD_TEST
     };
 
-    public void loadSelection()
-    {
+    public void loadSelection() {
         selected.clear();
         // avoid crash on context problem
         if (MainActivity.getInstance().getBaseContext() == null)
@@ -107,20 +108,16 @@ public class ActivityRegistry {
 
         SharedPreferences settings = MainActivity.getInstance().getSharedPreferences(MainActivity.PREFERENCES_FILE, 0);
         //SharedPreferences.Editor editor = settings.edit();
-        for(int i = 0; i< CustomFragment.BUTTONCOUNT; i++)
-        {
-            int act = settings.getInt("buttonC"+i,-1);
-            if(act!=-1)
-            {
+        for (int i = 0; i < CustomFragment.BUTTONCOUNT; i++) {
+            int act = settings.getInt("buttonC" + i, -1);
+            if (act != -1) {
                 selected.add(activities.get(act));
             }
         }
     }
 
 
-
-    private ActivityRegistry()
-    {
+    private ActivityRegistry() {
         /*// main
         activities.add(new Activity("CONSUMPTION", @drawable/button_consumption",ConsumptionActivity.class));
         activities.add(new Activity("CHARGING","@drawable/button_charge",ChargingActivity.class));
@@ -154,6 +151,7 @@ public class ActivityRegistry {
         activities.add(new Activity(ACTIVITY_CHARGING, R.string.button_Charging, R.drawable.button_charge, ChargingActivity.class));
         activities.add(new Activity(ACTIVITY_BATTERY, R.string.button_Battery, R.drawable.button_battery, BatteryActivity.class));
         activities.add(new Activity(ACTIVITY_DRIVING, R.string.button_Driving, R.drawable.button_drive, DrivingActivity.class));
+        activities.add(new Activity(ACTIVITY_DRIVING_ADVANCED, R.string.button_Driving_advanced, R.drawable.button_drive, DrivingAdvancedActivity.class));
         activities.add(new Activity(ACTIVITY_CLIMATE, R.string.button_Climate, R.drawable.button_climate, ClimaTechActivity.class));
         activities.add(new Activity(ACTIVITY_BRAKING, R.string.button_Braking, R.drawable.button_brake, BrakingActivity.class));
         activities.add(new Activity(ACTIVITY_AVERAGE_SPEED, R.string.button_speedcontrol, R.drawable.button_speedcam, SpeedcontrolActivity.class));
@@ -188,54 +186,48 @@ public class ActivityRegistry {
         loadSelection();
     }
 
-    public static ActivityRegistry getInstance()
-    {
-        if(registry==null) registry = new ActivityRegistry();
+    public static ActivityRegistry getInstance() {
+        if (registry == null) registry = new ActivityRegistry();
         return registry;
     }
 
-    public Activity get(int index)
-    {
+    public Activity get(int index) {
         if (index >= 0 && index < activities.size())
             return activities.get(index);
         return null;
     }
 
-    public Activity getById (int id) {
+    public Activity getById(int id) {
         for (int i = 0; i < activities.size(); i++) {
-            Activity a = activities.get (i);
+            Activity a = activities.get(i);
             if (a.getId() == id) return a;
         }
         return null;
     }
 
-    public Activity getByTitle (String title) {
+    public Activity getByTitle(String title) {
         for (int i = 0; i < activities.size(); i++) {
-            Activity a = activities.get (i);
+            Activity a = activities.get(i);
             if (a.getTitle().equals(title)) return a;
         }
         return null;
     }
 
-    public int size()
-    {
+    public int size() {
         return activities.size();
     }
 
-    public Activity selectedGet(int index)
-    {
+    public Activity selectedGet(int index) {
         if (index >= 0 && index < selected.size())
             return selected.get(index);
         return null;
     }
 
-    public int selectedSize()
-    {
+    public int selectedSize() {
         return selected.size();
     }
 
-    public ArrayList<String> getActivities()
-    {
+    public ArrayList<String> getActivities() {
         ArrayList<String> result = new ArrayList<>();
         for (int i = 0; i < activities.size(); i++) {
             result.add(activities.get(i).getTitle());
@@ -243,8 +235,7 @@ public class ActivityRegistry {
         return result;
     }
 
-    public ArrayList<String> getSelected()
-    {
+    public ArrayList<String> getSelected() {
         ArrayList<String> result = new ArrayList<>();
         for (int i = 0; i < selected.size(); i++) {
             result.add(selected.get(i).getTitle());
@@ -252,26 +243,22 @@ public class ActivityRegistry {
         return result;
     }
 
-    public void addToSelected(int index)
-    {
+    public void addToSelected(int index) {
         if (index >= 0 && index < activities.size())
             selected.add(activities.get(index));
     }
 
-    public void removeFromSelected(int index)
-    {
+    public void removeFromSelected(int index) {
         if (index >= 0 && index < selected.size())
-        selected.remove(index);
+            selected.remove(index);
     }
 
-    public int getPos(Activity a)
-    {
+    public int getPos(Activity a) {
         return activities.indexOf(a);
     }
 
-    public boolean moveSelectedUp(int index)
-    {
-        if(index > 0 && index < selected.size()) {
+    public boolean moveSelectedUp(int index) {
+        if (index > 0 && index < selected.size()) {
             Activity a = selected.get(index);
             selected.remove(index);
             selected.add(index - 1, a);
@@ -280,9 +267,8 @@ public class ActivityRegistry {
         return false;
     }
 
-    public boolean moveSelectedDown(int index)
-    {
-        if(index >= 0 && index < selected.size()-1) {
+    public boolean moveSelectedDown(int index) {
+        if (index >= 0 && index < selected.size() - 1) {
             Activity a = selected.get(index);
             selected.remove(index);
             selected.add(index + 1, a);
