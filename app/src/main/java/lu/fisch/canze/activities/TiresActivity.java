@@ -83,71 +83,25 @@ public class TiresActivity extends CanzeActivity implements FieldListener, Debug
 
         // set the two button handlers
         Button button = findViewById(R.id.button_TiresRead);
-        button.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                (new Thread(new Runnable() {
-                    @Override
-                    public void run() {
-                        buttonRead();
-                    }
-                })).start();
-
-            }
-        });
+        button.setOnClickListener(v -> (new Thread(this::buttonRead)).start());
 
         button = findViewById(R.id.button_TiresWrite);
-        button.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                (new Thread(new Runnable() {
-                    @Override
-                    public void run() {
-                        buttonWrite();
-                    }
-                })).start();
-            }
-        });
+        button.setOnClickListener(v -> (new Thread(this::buttonWrite)).start());
 
         button = findViewById(R.id.button_TiresLoadA);
-        button.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                load ("A");
-            }
-        });
+        button.setOnClickListener(v -> load ("A"));
 
         button = findViewById(R.id.button_TiresSaveA);
-        button.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                save("A");
-            }
-        });
+        button.setOnClickListener(v -> save("A"));
 
         button = findViewById(R.id.button_TiresLoadB);
-        button.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                load ("B");
-            }
-        });
+        button.setOnClickListener(v -> load ("B"));
 
         button = findViewById(R.id.button_TiresSaveB);
-        button.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                save("B");
-            }
-        });
+        button.setOnClickListener(v -> save("B"));
 
         button = findViewById(R.id.button_TiresSwap);
-        button.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                buttonSwap();
-            }
-        });
+        button.setOnClickListener(v -> buttonSwap());
 
         tpmsState(-1); // initialize to "no TPMS, but don't Toast that". This ensures disabled fields, also after a rotate
     }
@@ -172,77 +126,74 @@ public class TiresActivity extends CanzeActivity implements FieldListener, Debug
     public void onFieldUpdateEvent(final Field field) {
         // the update has to be done in a separate thread
         // otherwise the UI will not be repainted
-        runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                if (Double.isNaN(field.getValue())) return;
-                String fieldId = field.getSID();
-                TextView tv = null;
-                String value = "";
-                int intValue = (int) field.getValue();
-                int color = baseColor;
+        runOnUiThread(() -> {
+            if (Double.isNaN(field.getValue())) return;
+            String fieldId = field.getSID();
+            TextView tv = null;
+            String value = "";
+            int intValue = (int) field.getValue();
+            int color = baseColor;
 
-                // get the text field
-                switch (fieldId) {
-                    case Sid.TpmsState:
-                        tpmsState (intValue);
-                        tv = null;
-                        break;
-                    case Sid.TireSpdPresMisadaption:
-                        tv = findViewById(R.id.text_TireSpdPresMisadaption);
-                        color = 0; // don't set color
-                        value = val_TireSpdPresMisadaption[intValue];
-                        break;
-                    case Sid.TireFLState:
-                        if (intValue < 0 || intValue > 6) return;
-                        tv = findViewById(R.id.text_TireFLState);
-                        if (intValue > 1) color = alarmColor;
-                        value = val_TireState != null ? val_TireState[intValue] : "";
-                        break;
-                    case Sid.TireFLPressure:
-                        tv = findViewById(R.id.text_TireFLPressure);
-                        value = (intValue >= 3499) ? val_Unavailable : ("" + intValue);
-                        break;
-                    case Sid.TireFRState:
-                        if (intValue < 0 || intValue > 6) return;
-                        tv = findViewById(R.id.text_TireFRState);
-                        if (intValue > 1) color = alarmColor;
-                        value = val_TireState != null ? val_TireState[intValue] : "";
-                        break;
-                    case Sid.TireFRPressure:
-                        tv = findViewById(R.id.text_TireFRPressure);
-                        value = (intValue >= 3499) ? val_Unavailable : ("" + intValue);
-                        break;
-                    case Sid.TireRLState:
-                        if (intValue < 0 || intValue > 6) return;
-                        tv = findViewById(R.id.text_TireRLState);
-                        if (intValue > 1) color = alarmColor;
-                        value = val_TireState != null ? val_TireState[intValue] : "";
-                        break;
-                    case Sid.TireRLPressure:
-                        tv = findViewById(R.id.text_TireRLPressure);
-                        value = (intValue >= 3499) ? val_Unavailable : ("" + intValue);
-                        break;
-                    case Sid.TireRRState:
-                        if (intValue < 0 || intValue > 6) return;
-                        tv = findViewById(R.id.text_TireRRState);
-                        if (intValue > 1) color = alarmColor;
-                        value = val_TireState != null ? val_TireState[intValue] : "";
-                        break;
-                    case Sid.TireRRPressure:
-                        tv = findViewById(R.id.text_TireRRPressure);
-                        value = (intValue >= 3499) ? val_Unavailable : ("" + intValue);
-                        break;
-                }
-                // set regular new content, all exeptions handled above
-                if (tv != null) {
-                    tv.setText(value);
-                    if (color != 0) tv.setBackgroundColor(color);
-                }
-
-                tv = findViewById(R.id.textDebug);
-                tv.setText(fieldId);
+            // get the text field
+            switch (fieldId) {
+                case Sid.TpmsState:
+                    tpmsState (intValue);
+                    tv = null;
+                    break;
+                case Sid.TireSpdPresMisadaption:
+                    tv = findViewById(R.id.text_TireSpdPresMisadaption);
+                    color = 0; // don't set color
+                    value = val_TireSpdPresMisadaption[intValue];
+                    break;
+                case Sid.TireFLState:
+                    if (intValue < 0 || intValue > 6) return;
+                    tv = findViewById(R.id.text_TireFLState);
+                    if (intValue > 1) color = alarmColor;
+                    value = val_TireState != null ? val_TireState[intValue] : "";
+                    break;
+                case Sid.TireFLPressure:
+                    tv = findViewById(R.id.text_TireFLPressure);
+                    value = convertValueToString(intValue);
+                    break;
+                case Sid.TireFRState:
+                    if (intValue < 0 || intValue > 6) return;
+                    tv = findViewById(R.id.text_TireFRState);
+                    if (intValue > 1) color = alarmColor;
+                    value = val_TireState != null ? val_TireState[intValue] : "";
+                    break;
+                case Sid.TireFRPressure:
+                    tv = findViewById(R.id.text_TireFRPressure);
+                    value = convertValueToString(intValue);
+                    break;
+                case Sid.TireRLState:
+                    if (intValue < 0 || intValue > 6) return;
+                    tv = findViewById(R.id.text_TireRLState);
+                    if (intValue > 1) color = alarmColor;
+                    value = val_TireState != null ? val_TireState[intValue] : "";
+                    break;
+                case Sid.TireRLPressure:
+                    tv = findViewById(R.id.text_TireRLPressure);
+                    value = convertValueToString(intValue);
+                    break;
+                case Sid.TireRRState:
+                    if (intValue < 0 || intValue > 6) return;
+                    tv = findViewById(R.id.text_TireRRState);
+                    if (intValue > 1) color = alarmColor;
+                    value = val_TireState != null ? val_TireState[intValue] : "";
+                    break;
+                case Sid.TireRRPressure:
+                    tv = findViewById(R.id.text_TireRRPressure);
+                    value = convertValueToString(intValue);
+                    break;
             }
+            // set regular new content, all exeptions handled above
+            if (tv != null) {
+                tv.setText(value);
+                if (color != 0) tv.setBackgroundColor(color);
+            }
+
+            tv = findViewById(R.id.textDebug);
+            tv.setText(fieldId);
         });
     }
 
@@ -536,5 +487,9 @@ public class TiresActivity extends CanzeActivity implements FieldListener, Debug
         for (int i = 0; i < ids.length; i++) {
             ids[i] = 0x800000 | (ids[i] & 0x7fffff);
         }
+    }
+
+    private String convertValueToString(int intValue) {
+        return (intValue >= 3499) ? val_Unavailable : (String.valueOf(intValue));
     }
 }

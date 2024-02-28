@@ -10,6 +10,8 @@
 /.idea/.gitignore
 /.idea/deploymentTargetDropDown.xml
 /.idea/migrations.xml
+/.idea/appInsightsSettings.xml
+/.idea/csv-editor.xml
 /projectFilesBackup/
 gradle.xml
 /app/google-services.json
