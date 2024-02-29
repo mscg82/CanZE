@@ -228,6 +228,7 @@
             '800.6104.24':'alt',
             '800.6109.24':'colorline[0],alt'
             }"
+        custom:isInverted="false"
         custom:timeScale="4"
         custom:intervals="{'427.49':10000}"
         custom:backgroundColor="?android:attr/colorBackground"
