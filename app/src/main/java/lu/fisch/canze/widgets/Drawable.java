@@ -27,21 +27,15 @@ package lu.fisch.canze.widgets;
 
 import android.graphics.Point;
 
-import com.google.gson.Gson;
-
 import java.util.ArrayList;
-import java.util.HashMap;
 
 import lu.fisch.awt.Color;
 import lu.fisch.awt.Graphics;
 import lu.fisch.awt.Rectangle;
-import lu.fisch.canze.activities.CanzeActivity;
 import lu.fisch.canze.actors.Field;
-import lu.fisch.canze.actors.Fields;
 import lu.fisch.canze.classes.ColorRanges;
 import lu.fisch.canze.classes.Intervals;
 import lu.fisch.canze.classes.Options;
-import lu.fisch.canze.database.CanzeDataSource;
 import lu.fisch.canze.interfaces.DrawSurfaceInterface;
 import lu.fisch.canze.interfaces.FieldListener;
 
@@ -63,7 +57,7 @@ public abstract class Drawable implements FieldListener {
     protected int value = 0;
     protected Field field = null;
     protected String title = "";
-    protected int timeSale = 1;
+    protected int timeScale = 1;
 
     // colors
     protected Color foreground   = Color.BLACK;
@@ -331,10 +325,10 @@ public abstract class Drawable implements FieldListener {
     }
 
     public int getTimeScale() {
-        return timeSale;
+        return timeScale;
     }
 
     public void setTimeScale(int timescale) {
-        this.timeSale = timescale;
+        this.timeScale = timescale;
     }
 }

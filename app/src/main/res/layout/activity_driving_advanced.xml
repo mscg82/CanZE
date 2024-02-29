@@ -226,7 +226,7 @@
         custom:options="{
             'valueSize':'24,20',
             '800.6104.24':'alt',
-            '800.6109.24':'alt'
+            '800.6109.24':'colorline[0],alt'
             }"
         custom:timeScale="4"
         custom:intervals="{'427.49':10000}"
