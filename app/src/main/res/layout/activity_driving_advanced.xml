@@ -9,7 +9,7 @@
     android:paddingTop="@dimen/activity_vertical_margin"
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingBottom="@dimen/activity_vertical_margin"
-    tools:context="lu.fisch.canze.activities.ChargingTechActivity">
+    tools:context="lu.fisch.canze.activities.DrivingAdvancedActivity">
 
     <TableLayout
         android:layout_width="match_parent"
@@ -199,17 +199,41 @@
         custom:text="@string/graph_Climatech"
         custom:widget="timeplot" />
 
+    <LinearLayout
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="6dp"
+        android:orientation="horizontal">
+
+        <TextView
+            android:id="@+id/label_instant_consumption"
+            android:layout_width="0dip"
+            android:layout_height="wrap_content"
+            android:layout_weight="0.7"
+            android:width="0dp"
+            android:text="@string/label_InstantConsumption" />
+
+        <TextView
+            android:id="@+id/text_instant_consumption"
+            android:layout_width="0dip"
+            android:layout_height="wrap_content"
+            android:layout_weight="0.3"
+            android:width="0dp"
+            android:gravity="end"
+            android:text="@string/default_Dash" />
+    </LinearLayout>
+
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="6dp"
+        android:layout_marginTop="0dp"
         android:text="@string/graph_EnergyAdvancedTitle"
         android:textStyle="bold" />
 
     <lu.fisch.canze.widgets.WidgetView
         android:layout_width="fill_parent"
         android:layout_height="0dip"
-        android:layout_weight="2"
+        android:layout_weight="2.1"
         custom:axisMinY="0"
         custom:axisMaxY="25,16:56,64:45,128:45"
         custom:axisMinYAlt="-30"

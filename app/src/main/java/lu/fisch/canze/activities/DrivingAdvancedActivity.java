@@ -42,10 +42,17 @@ public class DrivingAdvancedActivity extends CanzeActivity implements FieldListe
     private final String[] climate_Status = MainActivity.getStringList(MainActivity.isPh2() ? R.array.list_ClimateStatusPh2
             : R.array.list_ClimateStatus);
 
+    private double realSpeed = 0;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_driving_advanced);
+
+        TextView tv = findViewById(R.id.label_instant_consumption);
+        String baseLabel = MainActivity.getStringSingle(R.string.label_InstantConsumption);
+        String unit = MainActivity.getStringSingle(MainActivity.milesMode ? R.string.unit_ConsumptionMiAlt : R.string.label_kWh100km);
+        tv.setText(String.format("%s (%s)", baseLabel, unit));
     }
 
     protected void initListeners() {
@@ -56,13 +63,14 @@ public class DrivingAdvancedActivity extends CanzeActivity implements FieldListe
         addField(Sid.Pressure, 1000);
         addField(Sid.BatteryConditioningMode, 0);
         addField(Sid.ClimaLoopMode, 0);
+        addField(Sid.DcPowerOut, 0);
+        addField(Sid.RealSpeed, 0);
 
         TextView tv = findViewById(R.id.textLabel_climatePower);
         if (MainActivity.isPh2()) {
             addField(Sid.ThermalComfortPower, 0);
             tv.setText(getResources().getString(R.string.label_ThermalComfortPower));
         } else {
-            addField(Sid.DcPowerOut, 0);
             tv.setText(getResources().getString(R.string.label_DcPwr));
         }
     }
@@ -82,11 +90,31 @@ public class DrivingAdvancedActivity extends CanzeActivity implements FieldListe
             // get the text field
             switch (fieldId) {
 
+                case Sid.RealSpeed:
+                    realSpeed = field.getValue();
+                    break;
+
                 case Sid.EngineFanSpeed:
                     tv = findViewById(R.id.text_EFS);
                     break;
 
-                case Sid.DcPowerOut:
+                case Sid.DcPowerOut: {
+                    tv = findViewById(R.id.text_ClimatePower);
+                    double dcPwr = field.getValue();
+                    String instantConsumption;
+                    if (!MainActivity.milesMode && realSpeed > 5) {
+                        instantConsumption = String.format(Locale.getDefault(), "%.1f", 100.0 * dcPwr / realSpeed);
+                    } else if (MainActivity.milesMode && dcPwr != 0) {
+                        instantConsumption = String.format(Locale.getDefault(), "%.2f", realSpeed / dcPwr);
+                    } else {
+                        instantConsumption = MainActivity.getStringSingle(R.string.default_Dash);
+                    }
+
+                    TextView instantConsumptionText = findViewById(R.id.text_instant_consumption);
+                    instantConsumptionText.setText(instantConsumption);
+                    break;
+                }
+
                 case Sid.ThermalComfortPower:
                     tv = findViewById(R.id.text_ClimatePower);
                     break;
