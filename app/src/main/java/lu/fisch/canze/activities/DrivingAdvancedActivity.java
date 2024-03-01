@@ -24,6 +24,8 @@ package lu.fisch.canze.activities;
 import android.os.Bundle;
 import android.widget.TextView;
 
+import java.util.ArrayDeque;
+import java.util.Deque;
 import java.util.Locale;
 
 import lu.fisch.canze.R;
@@ -42,8 +44,18 @@ public class DrivingAdvancedActivity extends CanzeActivity implements FieldListe
     private final String[] climate_Status = MainActivity.getStringList(MainActivity.isPh2() ? R.array.list_ClimateStatusPh2
             : R.array.list_ClimateStatus);
 
-    private double realSpeed = 0;
-    private double dcPwr = Double.NaN;
+    private final Deque<Double> realSpeeds;
+    private final Deque<Double> dcPwrs;
+
+    public DrivingAdvancedActivity() {
+        int maxValues = 3;
+        this.realSpeeds = new ArrayDeque<>(maxValues);
+        this.dcPwrs = new ArrayDeque<>(maxValues);
+        for (int i = 1; i <= maxValues; i++) {
+            realSpeeds.add(Double.NEGATIVE_INFINITY);
+            dcPwrs.add(i != maxValues ? Double.NEGATIVE_INFINITY : Double.NaN);
+        }
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -92,7 +104,8 @@ public class DrivingAdvancedActivity extends CanzeActivity implements FieldListe
             switch (fieldId) {
 
                 case Sid.RealSpeed:
-                    realSpeed = field.getValue();
+                    realSpeeds.removeFirst();
+                    realSpeeds.addLast(field.getValue());
                     showInstantConsumption();
                     break;
 
@@ -102,7 +115,8 @@ public class DrivingAdvancedActivity extends CanzeActivity implements FieldListe
 
                 case Sid.DcPowerOut: {
                     tv = findViewById(R.id.text_ClimatePower);
-                    dcPwr = field.getValue();
+                    dcPwrs.removeFirst();
+                    dcPwrs.addLast(field.getValue());
                     showInstantConsumption();
                     break;
                 }
@@ -152,6 +166,9 @@ public class DrivingAdvancedActivity extends CanzeActivity implements FieldListe
     }
 
     private void showInstantConsumption() {
+        double realSpeed = averageValues(realSpeeds);
+        double dcPwr = averageValues(dcPwrs);
+
         String instantConsumption;
         if (!MainActivity.milesMode && realSpeed > 5 && !Double.isNaN(dcPwr)) {
             instantConsumption = String.format(Locale.getDefault(), "%.1f", 100.0 * dcPwr / realSpeed);
@@ -163,6 +180,19 @@ public class DrivingAdvancedActivity extends CanzeActivity implements FieldListe
 
         TextView instantConsumptionText = findViewById(R.id.text_instant_consumption);
         instantConsumptionText.setText(instantConsumption);
+    }
+
+    private static double averageValues(Deque<Double> values)
+    {
+        int validValues = 0;
+        double sum = 0.0;
+        for (Double val : values) {
+            if (!Double.isInfinite(val)) {
+                sum += val;
+                validValues++;
+            }
+        }
+        return validValues != 0 ? sum / validValues : sum;
     }
 
 }
