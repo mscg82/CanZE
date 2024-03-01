@@ -43,6 +43,7 @@ public class DrivingAdvancedActivity extends CanzeActivity implements FieldListe
             : R.array.list_ClimateStatus);
 
     private double realSpeed = 0;
+    private double dcPwr = Double.NaN;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -92,6 +93,7 @@ public class DrivingAdvancedActivity extends CanzeActivity implements FieldListe
 
                 case Sid.RealSpeed:
                     realSpeed = field.getValue();
+                    showInstantConsumption();
                     break;
 
                 case Sid.EngineFanSpeed:
@@ -100,18 +102,8 @@ public class DrivingAdvancedActivity extends CanzeActivity implements FieldListe
 
                 case Sid.DcPowerOut: {
                     tv = findViewById(R.id.text_ClimatePower);
-                    double dcPwr = field.getValue();
-                    String instantConsumption;
-                    if (!MainActivity.milesMode && realSpeed > 5) {
-                        instantConsumption = String.format(Locale.getDefault(), "%.1f", 100.0 * dcPwr / realSpeed);
-                    } else if (MainActivity.milesMode && dcPwr != 0) {
-                        instantConsumption = String.format(Locale.getDefault(), "%.2f", realSpeed / dcPwr);
-                    } else {
-                        instantConsumption = MainActivity.getStringSingle(R.string.default_Dash);
-                    }
-
-                    TextView instantConsumptionText = findViewById(R.id.text_instant_consumption);
-                    instantConsumptionText.setText(instantConsumption);
+                    dcPwr = field.getValue();
+                    showInstantConsumption();
                     break;
                 }
 
@@ -157,6 +149,20 @@ public class DrivingAdvancedActivity extends CanzeActivity implements FieldListe
             }
         });
 
+    }
+
+    private void showInstantConsumption() {
+        String instantConsumption;
+        if (!MainActivity.milesMode && realSpeed > 5 && !Double.isNaN(dcPwr)) {
+            instantConsumption = String.format(Locale.getDefault(), "%.1f", 100.0 * dcPwr / realSpeed);
+        } else if (MainActivity.milesMode && dcPwr != 0 && !Double.isNaN(dcPwr)) {
+            instantConsumption = String.format(Locale.getDefault(), "%.2f", realSpeed / dcPwr);
+        } else {
+            instantConsumption = MainActivity.getStringSingle(R.string.default_Dash);
+        }
+
+        TextView instantConsumptionText = findViewById(R.id.text_instant_consumption);
+        instantConsumptionText.setText(instantConsumption);
     }
 
 }

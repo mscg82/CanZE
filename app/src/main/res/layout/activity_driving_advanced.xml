@@ -220,6 +220,7 @@
             android:layout_weight="0.3"
             android:width="0dp"
             android:gravity="end"
+            android:textSize="20sp"
             android:text="@string/default_Dash" />
     </LinearLayout>
 
