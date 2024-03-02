@@ -22,6 +22,7 @@
 package lu.fisch.canze.activities;
 
 import android.os.Bundle;
+import android.view.View;
 import android.widget.TextView;
 
 import java.util.ArrayDeque;
@@ -48,7 +49,7 @@ public class DrivingAdvancedActivity extends CanzeActivity implements FieldListe
     private final Deque<Double> dcPwrs;
 
     public DrivingAdvancedActivity() {
-        int maxValues = 10;
+        int maxValues = 5;
         this.realSpeeds = new ArrayDeque<>(maxValues);
         this.dcPwrs = new ArrayDeque<>(maxValues);
         for (int i = 1; i <= maxValues; i++) {
@@ -79,12 +80,11 @@ public class DrivingAdvancedActivity extends CanzeActivity implements FieldListe
         addField(Sid.DcPowerOut, 0);
         addField(Sid.RealSpeed, 0);
 
-        TextView tv = findViewById(R.id.textLabel_climatePower);
         if (MainActivity.isPh2()) {
             addField(Sid.ThermalComfortPower, 0);
-            tv.setText(getResources().getString(R.string.label_ThermalComfortPower));
         } else {
-            tv.setText(getResources().getString(R.string.label_DcPwr));
+            findViewById(R.id.textLabel_climatePower).setVisibility(View.GONE);
+
         }
     }
 
@@ -114,7 +114,7 @@ public class DrivingAdvancedActivity extends CanzeActivity implements FieldListe
                     break;
 
                 case Sid.DcPowerOut: {
-                    tv = findViewById(R.id.text_ClimatePower);
+                    tv = findViewById(R.id.text_dc_pwr);
                     dcPwrs.removeFirst();
                     dcPwrs.addLast(field.getValue());
                     showInstantConsumption();

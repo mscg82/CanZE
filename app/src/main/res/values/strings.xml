@@ -507,8 +507,7 @@
     <string name="graph_PilotPower">Charge pilot amp (A), Charging power (kW)</string>
     <string name="graph_MaxRealChPwr">Max battery charge (kW) / DC charging power (kW)</string>
     <string name="graph_EnergyTemperature">Available energy (kWh), temperature (°C)</string>
-    <string name="graph_EnergyAdvancedTitle" translatable="false">Energy and power info</string>
-    <string name="graph_EnergyAdvanced" translatable="false">Available energy (kWh), Consumption (kWh/100km), Power (kW)</string>
+    <string name="graph_EnergyAdvanced" translatable="false">Available energy (kWh), Consumption (kWh/100km)</string>
 
     <!-- Charging history -->
 

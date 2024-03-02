@@ -121,7 +121,7 @@ public class Timeplot extends Drawable {
                 return Color.GREEN;
 
             default:
-                return Color.GRAY;
+                return Color.RENAULT_BLUE;
         }
     }
 
