@@ -48,12 +48,12 @@ public class DrivingAdvancedActivity extends CanzeActivity implements FieldListe
     private final Deque<Double> dcPwrs;
 
     public DrivingAdvancedActivity() {
-        int maxValues = 3;
+        int maxValues = 10;
         this.realSpeeds = new ArrayDeque<>(maxValues);
         this.dcPwrs = new ArrayDeque<>(maxValues);
         for (int i = 1; i <= maxValues; i++) {
             realSpeeds.add(Double.NEGATIVE_INFINITY);
-            dcPwrs.add(i != maxValues ? Double.NEGATIVE_INFINITY : Double.NaN);
+            dcPwrs.add(Double.NEGATIVE_INFINITY);
         }
     }
 
@@ -170,9 +170,9 @@ public class DrivingAdvancedActivity extends CanzeActivity implements FieldListe
         double dcPwr = averageValues(dcPwrs);
 
         String instantConsumption;
-        if (!MainActivity.milesMode && realSpeed > 5 && !Double.isNaN(dcPwr)) {
+        if (!MainActivity.milesMode && !Double.isNaN(realSpeed) && realSpeed > 5 && !Double.isNaN(dcPwr)) {
             instantConsumption = String.format(Locale.getDefault(), "%.1f", 100.0 * dcPwr / realSpeed);
-        } else if (MainActivity.milesMode && dcPwr != 0 && !Double.isNaN(dcPwr)) {
+        } else if (MainActivity.milesMode && !Double.isNaN(dcPwr) && dcPwr != 0) {
             instantConsumption = String.format(Locale.getDefault(), "%.2f", realSpeed / dcPwr);
         } else {
             instantConsumption = MainActivity.getStringSingle(R.string.default_Dash);
@@ -182,8 +182,7 @@ public class DrivingAdvancedActivity extends CanzeActivity implements FieldListe
         instantConsumptionText.setText(instantConsumption);
     }
 
-    private static double averageValues(Deque<Double> values)
-    {
+    private static double averageValues(Deque<Double> values) {
         int validValues = 0;
         double sum = 0.0;
         for (Double val : values) {
