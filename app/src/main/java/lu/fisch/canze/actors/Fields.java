@@ -317,7 +317,7 @@ public class Fields {
         // need to use real timer. Now the averaging is dependant on dongle speed
         final String SID_VirtualUsage = "800.6100.24";
 
-        addVirtualFieldCommon("6104", "kWh/100km", SID_VirtualUsage, dependantFields -> {
+        addVirtualFieldCommon("6104", 1, "kWh/100km", SID_VirtualUsage, dependantFields -> {
             Field privateField;
             if ((privateField = dependantFields.get(SID_VirtualUsage)) == null) return Double.NaN;
             double value = privateField.getValue();
