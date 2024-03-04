@@ -283,11 +283,15 @@ public class Fields {
 */
     private void addVirtualFieldDcPowerIn() {
         // positive = charging, negative = discharging. Unusable for consumption graphs
-        addVirtualFieldCommon("6103", "kW", Sid.TractionBatteryVoltage + ";" + Sid.TractionBatteryCurrent, dependantFields -> {
+        addVirtualFieldCommon("6103", 1, "kW", Sid.TractionBatteryVoltage + ";" + Sid.TractionBatteryCurrent, dependantFields -> {
             Field privateField;
-            if ((privateField = dependantFields.get(Sid.TractionBatteryVoltage)) == null) return Double.NaN;
+            if ((privateField = dependantFields.get(Sid.TractionBatteryVoltage)) == null) {
+                return Double.NaN;
+            }
             double voltage = privateField.getValue();
-            if ((privateField = dependantFields.get(Sid.TractionBatteryCurrent)) == null) return Double.NaN;
+            if ((privateField = dependantFields.get(Sid.TractionBatteryCurrent)) == null) {
+                return Double.NaN;
+            }
             return (voltage * privateField.getValue() / 1000.0);
             //return dependantFields.get(SID_TractionBatteryVoltage).getValue() * dependantFields.get(SID_TractionBatteryCurrent).getValue() / 1000;
         });
@@ -295,13 +299,15 @@ public class Fields {
 
     private void addVirtualFieldDcPowerOut() {
         // positive = discharging, negative = charging. Unusable for charging graphs
-
-
-        addVirtualFieldCommon("6109", "kW", Sid.TractionBatteryVoltage + ";" + Sid.TractionBatteryCurrent, dependantFields -> {
+        addVirtualFieldCommon("6109", 1, "kW", Sid.TractionBatteryVoltage + ";" + Sid.TractionBatteryCurrent, dependantFields -> {
             Field privateField;
-            if ((privateField = dependantFields.get(Sid.TractionBatteryVoltage)) == null) return Double.NaN;
+            if ((privateField = dependantFields.get(Sid.TractionBatteryVoltage)) == null) {
+                return Double.NaN;
+            }
             double voltage = privateField.getValue();
-            if ((privateField = dependantFields.get(Sid.TractionBatteryCurrent)) == null) return Double.NaN;
+            if ((privateField = dependantFields.get(Sid.TractionBatteryCurrent)) == null) {
+                return Double.NaN;
+            }
             return (voltage * privateField.getValue() / -1000.0);
         });
     }
