@@ -77,14 +77,12 @@ public class DrivingAdvancedActivity extends CanzeActivity implements FieldListe
         addField(Sid.Pressure, 1000);
         addField(Sid.BatteryConditioningMode, 0);
         addField(Sid.ClimaLoopMode, 0);
-        addField(Sid.DcPowerOut, 0);
         addField(Sid.RealSpeed, 0);
 
         if (MainActivity.isPh2()) {
             addField(Sid.ThermalComfortPower, 0);
         } else {
             findViewById(R.id.textLabel_climatePower).setVisibility(View.GONE);
-
         }
     }
 
@@ -96,12 +94,8 @@ public class DrivingAdvancedActivity extends CanzeActivity implements FieldListe
         // the update has to be done in a separate thread
         // otherwise the UI will not be repainted
         runOnUiThread(() -> {
-            String fieldId = field.getSID();
-            TextView tv = null;
-            int value;
-
             // get the text field
-            switch (fieldId) {
+            switch (field.getSID()) {
 
                 case Sid.RealSpeed:
                     realSpeeds.removeFirst();
@@ -110,59 +104,55 @@ public class DrivingAdvancedActivity extends CanzeActivity implements FieldListe
                     break;
 
                 case Sid.EngineFanSpeed:
-                    tv = findViewById(R.id.text_EFS);
+                    setNumericValueFromField(findViewById(R.id.text_EFS), field);
                     break;
 
-                case Sid.DcPowerOut: {
-                    tv = findViewById(R.id.text_dc_pwr);
+                case Sid.DcPowerOut:
                     dcPwrs.removeFirst();
                     dcPwrs.addLast(field.getValue());
                     showInstantConsumption();
                     break;
-                }
 
                 case Sid.ThermalComfortPower:
-                    tv = findViewById(R.id.text_ClimatePower);
+                    setNumericValueFromField(findViewById(R.id.text_ClimatePower), field);
                     break;
 
                 case Sid.HvCoolingState:
-                    value = (int) field.getValue();
-                    tv = findViewById(R.id.text_HCS);
-                    if (tv != null && cooling_Status != null && value >= 0 && value < cooling_Status.length)
-                        tv.setText(cooling_Status[value]);
-                    tv = null;
+                    setTextValueFromField(findViewById(R.id.text_HCS), cooling_Status, field);
                     break;
 
                 case Sid.HvEvaporationTemp:
-                    tv = findViewById(R.id.text_HET);
+                    setNumericValueFromField(findViewById(R.id.text_HET), field);
                     break;
 
                 case Sid.Pressure:
-                    tv = findViewById(R.id.text_PRE);
+                    setNumericValueFromField(findViewById(R.id.text_PRE), field);
                     break;
 
                 case Sid.BatteryConditioningMode:
-                    value = (int) field.getValue();
-                    tv = findViewById(R.id.text_HCM);
-                    if (tv != null && conditioning_Status != null && value >= 0 && value < conditioning_Status.length)
-                        tv.setText(conditioning_Status[value]);
-                    tv = null;
+                    setTextValueFromField(findViewById(R.id.text_HCM), conditioning_Status, field);
                     break;
 
                 case Sid.ClimaLoopMode:
-                    value = (int) field.getValue();
-                    tv = findViewById(R.id.text_CLM);
-                    if (tv != null && climate_Status != null && value >= 0 && value < climate_Status.length)
-                        tv.setText(climate_Status[value]);
-                    tv = null;
+                    setTextValueFromField(findViewById(R.id.text_CLM), climate_Status, field);
                     break;
-            }
-            // set regular new content, all exceptions handled above
-            if (tv != null) {
-                tv.setText(String.format(Locale.getDefault(), "%.1f", field.getValue()));
             }
         });
 
+    }
+
+    private void setNumericValueFromField(TextView tv, Field field)
+    {
+        if (tv != null) {
+            tv.setText(String.format(Locale.getDefault(), "%.1f", field.getValue()));
+        }
+    }
+
+    private void setTextValueFromField(TextView tv, String[] values, Field field) {
+        int value = (int) field.getValue();
+        if (tv != null && values != null && value >= 0 && value < values.length) {
+            tv.setText(values[value]);
+        }
     }
 
     private void showInstantConsumption() {
