@@ -633,7 +633,7 @@ public class Fields {
     }
 
     private void addVirtualFieldAltitude() {
-        addVirtualFieldCommon("610f", 1, "m", (short) 0xaff, Sid.GPS, dependantFields -> {
+        addVirtualFieldCommon("610f", 1, "m", (short) 0x8ff, Sid.GPS, dependantFields -> {
             Field privateField;
             if ((privateField = dependantFields.get(Sid.GPS)) == null) return Double.NaN;
             String value = privateField.getStringValue();
