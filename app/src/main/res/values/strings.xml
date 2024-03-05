@@ -357,7 +357,7 @@
     <string name="header_Battery">Battery parameters</string>
     <string name="header_DrivingCh">Driving</string>
     <string name="header_CompTemp">Battery modules temperatures and balancing</string>
-    <string name="label_max_charge">Max battery charge/regen kW</string>
+    <string name="label_max_charge">Max battery\ncharge/regen (kW)</string>
     <string name="label_max_pilot">Charge pilot Amp</string>
     <string name="label_Phases">Phases</string>
     <string name="label_UserSOC">Usable state of charge (%)</string>
@@ -370,7 +370,7 @@
     <string name="label_Volt">HV Battery voltage (V)</string>
     <string name="label_Amps">HV Battery current (A)</string>
     <string name="label_DcPwr">DC Power (kW)</string>
-    <string name="label_AvChPwr">Available charging power (kW)</string>
+    <string name="label_AvChPwr">Available\ncharging power (kW)</string>
     <string name="label_AvEner">Available Energy (kWh)</string>
     <string name="label_12V">12 volt voltage (V)</string>
     <string name="label_12A">12 volt current (A)</string>
