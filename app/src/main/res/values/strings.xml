@@ -508,6 +508,7 @@
     <string name="graph_MaxRealChPwr">Max battery charge (kW) / DC charging power (kW)</string>
     <string name="graph_EnergyTemperature">Available energy (kWh), temperature (°C)</string>
     <string name="graph_EnergyAdvanced" translatable="false">Available energy (kWh), Consumption (kWh/100km), DC Power (kW)</string>
+    <string name="label_Altitude" translatable="false">Altitude (m)</string>
 
     <!-- Charging history -->
 

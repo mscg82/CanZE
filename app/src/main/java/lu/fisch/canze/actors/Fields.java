@@ -32,14 +32,6 @@ import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
 
-import lu.fisch.canze.R;
-import lu.fisch.canze.activities.MainActivity;
-import lu.fisch.canze.classes.Crashlytics;
-import lu.fisch.canze.classes.FieldLogger;
-import lu.fisch.canze.classes.Sid;
-import lu.fisch.canze.database.CanzeDataSource;
-import lu.fisch.canze.interfaces.VirtualFieldAction;
-
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
@@ -47,6 +39,14 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Locale;
+
+import lu.fisch.canze.R;
+import lu.fisch.canze.activities.MainActivity;
+import lu.fisch.canze.classes.Crashlytics;
+import lu.fisch.canze.classes.FieldLogger;
+import lu.fisch.canze.classes.Sid;
+import lu.fisch.canze.database.CanzeDataSource;
+import lu.fisch.canze.interfaces.VirtualFieldAction;
 
 /**
  * @author robertfisch test
@@ -95,6 +95,7 @@ public class Fields {
 
     private void addVirtualFields() {
         addVirtualFieldUsage();
+        addVirtualFieldUsageByIntegration();
         addVirtualFieldUsageLpf();
         addVirtualFieldFrictionTorque();
         //addVirtualFieldFrictionPower();
@@ -108,30 +109,69 @@ public class Fields {
         addVirtualFieldRealDelta();
         addVirtualFieldRealDeltaNoReset();
         addVirtualFieldPilotAmp();
+        addVirtualFieldGps();
+        addVirtualFieldAltitude();
     }
 
     private void addVirtualField(String id) {
         switch (id) {
-            case "6100": addVirtualFieldUsage();                break;
-            case "6104": addVirtualFieldUsageLpf();             break;
-            case "6101": addVirtualFieldFrictionTorque();       break;
-            case "610a": addVirtualFieldElecBrakeTorque();      break;
-            case "610b": addVirtualFieldTotalPositiveTorque();  break;
-            case "610c": addVirtualFieldTotalNegativeTorque();  break;
-            case "6103": addVirtualFieldDcPowerIn();            break;
-            case "6109": addVirtualFieldDcPowerOut();           break;
-            case "6105": addVirtualFieldHeaterSetpoint();       break;
-            case "6106": addVirtualFieldRealRange();            break;
-            case "6107": addVirtualFieldRealDelta();            break;
-            case "6108": addVirtualFieldRealDeltaNoReset();     break;
-            case "610d": addVirtualFieldPilotAmp();             break;
-            case "610e": addVirtualFieldGps();                  break;
+            case "6100":
+                addVirtualFieldUsage();
+                break;
+            case "6500":
+                addVirtualFieldUsageByIntegration();
+                break;
+            case "6104":
+                addVirtualFieldUsageLpf();
+                break;
+            case "6101":
+                addVirtualFieldFrictionTorque();
+                break;
+            case "610a":
+                addVirtualFieldElecBrakeTorque();
+                break;
+            case "610b":
+                addVirtualFieldTotalPositiveTorque();
+                break;
+            case "610c":
+                addVirtualFieldTotalNegativeTorque();
+                break;
+            case "6103":
+                addVirtualFieldDcPowerIn();
+                break;
+            case "6109":
+                addVirtualFieldDcPowerOut();
+                break;
+            case "6105":
+                addVirtualFieldHeaterSetpoint();
+                break;
+            case "6106":
+                addVirtualFieldRealRange();
+                break;
+            case "6107":
+                addVirtualFieldRealDelta();
+                break;
+            case "6108":
+                addVirtualFieldRealDeltaNoReset();
+                break;
+            case "610d":
+                addVirtualFieldPilotAmp();
+                break;
+            case "610e":
+                addVirtualFieldGps();
+                break;
+            case "610f":
+                addVirtualFieldAltitude();
+                break;
         }
     }
 
     public void selfPropel(String id, boolean startStop) {
         switch (id) {
-            case "610e": virtualFieldPropelGps (startStop);     break;
+            case "610e":
+            case "610f":
+                virtualFieldPropelGps(startStop);
+                break;
         }
     }
 
@@ -146,10 +186,12 @@ public class Fields {
             if (realSpeed < 0 || realSpeed > 150) return Double.NaN;
             if (realSpeed < 5) return 0;
             // get voltage
-            if ((privateField = dependantFields.get(Sid.TractionBatteryVoltage)) == null) return Double.NaN;
+            if ((privateField = dependantFields.get(Sid.TractionBatteryVoltage)) == null)
+                return Double.NaN;
             double dcVolt = privateField.getValue();
             // get current
-            if ((privateField = dependantFields.get(Sid.TractionBatteryCurrent)) == null) return Double.NaN;
+            if ((privateField = dependantFields.get(Sid.TractionBatteryCurrent)) == null)
+                return Double.NaN;
             double dcCur = privateField.getValue();
             if (dcVolt < 300 || dcVolt > 450 || dcCur < -200 || dcCur > 100) return Double.NaN;
             // power in kW
@@ -159,6 +201,10 @@ public class Fields {
             else if (usage > 150) return 150;
             else return usage;
         });
+    }
+
+    private void addVirtualFieldUsageByIntegration() {
+        // TODO
     }
 
     private void addVirtualFieldFrictionTorque() {
@@ -260,27 +306,28 @@ public class Fields {
             });
         }
     }
-/*
-    private void addVirtualFieldFrictionPower() {
-        final String SID_DriverBrakeWheel_Torque_Request = "130.44"; //UBP braking wheel torque the driver wants
-        final String SID_ElecBrakeWheelsTorqueApplied = "1f8.28"; //10ms
-        final String SID_ElecEngineRPM = "1f8.40"; //10ms
 
-        addVirtualFieldCommon("6102", "kW", SID_DriverBrakeWheel_Torque_Request + ";" + SID_ElecBrakeWheelsTorqueApplied + ";" + SID_ElecEngineRPM, new VirtualFieldAction() {
-            @Override
-            public double updateValue(HashMap<String, Field> dependantFields) {
-                Field privateField;
-                if ((privateField = dependantFields.get(SID_DriverBrakeWheel_Torque_Request)) == null) return Double.NaN;
-                double torque = privateField.getValue();
-                if ((privateField = dependantFields.get(SID_ElecBrakeWheelsTorqueApplied)) == null) return Double.NaN;
-                torque -= privateField.getValue();
-                if ((privateField = dependantFields.get(SID_ElecEngineRPM)) == null) return Double.NaN;
-                return (torque * privateField.getValue() / MainActivity.reduction);
-                //return (dependantFields.get(SID_DriverBrakeWheel_Torque_Request).getValue() - dependantFields.get(SID_ElecBrakeWheelsTorqueApplied).getValue()) * dependantFields.get(SID_ElecEngineRPM).getValue() / MainActivity.reduction;
-            }
-        });
-    }
-*/
+    /*
+        private void addVirtualFieldFrictionPower() {
+            final String SID_DriverBrakeWheel_Torque_Request = "130.44"; //UBP braking wheel torque the driver wants
+            final String SID_ElecBrakeWheelsTorqueApplied = "1f8.28"; //10ms
+            final String SID_ElecEngineRPM = "1f8.40"; //10ms
+
+            addVirtualFieldCommon("6102", "kW", SID_DriverBrakeWheel_Torque_Request + ";" + SID_ElecBrakeWheelsTorqueApplied + ";" + SID_ElecEngineRPM, new VirtualFieldAction() {
+                @Override
+                public double updateValue(HashMap<String, Field> dependantFields) {
+                    Field privateField;
+                    if ((privateField = dependantFields.get(SID_DriverBrakeWheel_Torque_Request)) == null) return Double.NaN;
+                    double torque = privateField.getValue();
+                    if ((privateField = dependantFields.get(SID_ElecBrakeWheelsTorqueApplied)) == null) return Double.NaN;
+                    torque -= privateField.getValue();
+                    if ((privateField = dependantFields.get(SID_ElecEngineRPM)) == null) return Double.NaN;
+                    return (torque * privateField.getValue() / MainActivity.reduction);
+                    //return (dependantFields.get(SID_DriverBrakeWheel_Torque_Request).getValue() - dependantFields.get(SID_ElecBrakeWheelsTorqueApplied).getValue()) * dependantFields.get(SID_ElecEngineRPM).getValue() / MainActivity.reduction;
+                }
+            });
+        }
+    */
     private void addVirtualFieldDcPowerIn() {
         // positive = charging, negative = discharging. Unusable for consumption graphs
         addVirtualFieldCommon("6103", 1, "kW", Sid.TractionBatteryVoltage + ";" + Sid.TractionBatteryCurrent, dependantFields -> {
@@ -340,7 +387,8 @@ public class Fields {
         if (MainActivity.isPh2()) {
             addVirtualFieldCommon("6105", 1, "°C", Sid.OH_ClimTempDisplay, dependantFields -> {
                 Field privateField;
-                if ((privateField = dependantFields.get(Sid.OH_ClimTempDisplay)) == null) return Double.NaN;
+                if ((privateField = dependantFields.get(Sid.OH_ClimTempDisplay)) == null)
+                    return Double.NaN;
                 double value = privateField.getValue();
                 if (value == 0) {
                     return Double.NaN;
@@ -355,7 +403,8 @@ public class Fields {
         } else if (MainActivity.altFieldsMode) {
             addVirtualFieldCommon("6105", "°C", Sid.OH_ClimTempDisplay, dependantFields -> {
                 Field privateField;
-                if ((privateField = dependantFields.get(Sid.OH_ClimTempDisplay)) == null) return Double.NaN;
+                if ((privateField = dependantFields.get(Sid.OH_ClimTempDisplay)) == null)
+                    return Double.NaN;
                 double value = privateField.getValue() / 2;
                 if (value == 0) {
                     return Double.NaN;
@@ -370,7 +419,8 @@ public class Fields {
         } else {
             addVirtualFieldCommon("6105", "°C", Sid.HeaterSetpoint, dependantFields -> {
                 Field privateField;
-                if ((privateField = dependantFields.get(Sid.HeaterSetpoint)) == null) return Double.NaN;
+                if ((privateField = dependantFields.get(Sid.HeaterSetpoint)) == null)
+                    return Double.NaN;
                 double value = privateField.getValue();
                 if (value == 0) {
                     return Double.NaN;
@@ -539,14 +589,18 @@ public class Fields {
         }
 
         @Override
-        public void onProviderDisabled(String provider) {}
+        public void onProviderDisabled(String provider) {
+        }
 
         @Override
-        public void onProviderEnabled(String provider) {}
+        public void onProviderEnabled(String provider) {
+        }
 
         @Override
-        public void onStatusChanged(String provider, int status, Bundle extras) {}
+        public void onStatusChanged(String provider, int status, Bundle extras) {
+        }
     }
+
     private void addVirtualFieldGps() {
         if (locationManager == null) {
             locationManager = (LocationManager) MainActivity.getInstance().getBaseContext().getSystemService(Context.LOCATION_SERVICE);
@@ -559,29 +613,47 @@ public class Fields {
             add(gpsField);
         }
     }
-    private void virtualFieldPropelGps (boolean startStop) {
+
+    private void virtualFieldPropelGps(boolean startStop) {
         if (locationManager == null) return;
         // yes I know, this is the brute force approach...
         try {
             if (startStop) {
-                if (locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER) ) {
+                if (locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
                     locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 5000, 10, locationListener);
                 } else {
                     MainActivity.toast(MainActivity.TOAST_NONE, "Can't start location. Please switch on location services");
                 }
             } else {
-                locationManager.removeUpdates (locationListener);
+                locationManager.removeUpdates(locationListener);
             }
         } catch (SecurityException e) {
             MainActivity.toast(MainActivity.TOAST_NONE, "Can't start location. Please give CanZE location permission");
         }
     }
 
+    private void addVirtualFieldAltitude() {
+        addVirtualFieldCommon("610f", 1, "m", (short) 0xaff, Sid.GPS, dependantFields -> {
+            Field privateField;
+            if ((privateField = dependantFields.get(Sid.GPS)) == null) return Double.NaN;
+            String value = privateField.getStringValue();
+            String[] parts = value == null ? new String[0] : value.split("/");
+            if (parts.length != 3) {
+                return Double.NaN;
+            }
+            return Double.parseDouble(parts[2]);
+        });
+    }
+
     private void addVirtualFieldCommon(String virtualId, String unit, String dependantSids, VirtualFieldAction virtualFieldAction) {
-        addVirtualFieldCommon(virtualId, 0, unit, dependantSids,virtualFieldAction);
+        addVirtualFieldCommon(virtualId, 0, unit, (short) 0, dependantSids, virtualFieldAction);
     }
 
     private void addVirtualFieldCommon(String virtualId, int decimals, String unit, String dependantSids, VirtualFieldAction virtualFieldAction) {
+        addVirtualFieldCommon(virtualId, decimals, unit, (short) 0, dependantSids, virtualFieldAction);
+    }
+
+    private void addVirtualFieldCommon(String virtualId, int decimals, String unit, short options, String dependantSids, VirtualFieldAction virtualFieldAction) {
         // create a list of field this new virtual field will depend on
         HashMap<String, Field> dependantFields = new HashMap<>();
         boolean allOk = true;
@@ -605,7 +677,7 @@ public class Fields {
                 MainActivity.debug("frame does not exist:0x800");
                 return;
             }
-            VirtualField virtualField = new VirtualField(virtualId, dependantFields, decimals, unit, virtualFieldAction);
+            VirtualField virtualField = new VirtualField(virtualId, dependantFields, decimals, unit, options, virtualFieldAction);
             // a virtualfield is always ISO-TP, so we need to create a subframe for it
             Frame subFrame = Frames.getInstance().getById(0x800, virtualField.getResponseId());
             if (subFrame == null) {
@@ -695,7 +767,7 @@ public class Fields {
             while ((line = bufferedReader.readLine()) != null)
                 fillOneLine(line);
             bufferedReader.close();
-        } catch (IOException e ) {
+        } catch (IOException e) {
             MainActivity.toast(MainActivity.TOAST_NONE, "Can't access file " + filename);
         }
     }
@@ -773,7 +845,7 @@ public class Fields {
     public void clearAllFields() {
         for (int i = 0; i < fields.size(); i++) {
             Field f = fields.get(i);
-            if(f!=null)
+            if (f != null)
                 fields.get(i).setValue(0);
         }
     }

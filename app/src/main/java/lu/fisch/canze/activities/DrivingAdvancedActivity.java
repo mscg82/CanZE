@@ -78,6 +78,7 @@ public class DrivingAdvancedActivity extends CanzeActivity implements FieldListe
         addField(Sid.BatteryConditioningMode, 0);
         addField(Sid.ClimaLoopMode, 0);
         addField(Sid.RealSpeed, 0);
+        addField(Sid.GPS_Altitude, 5000);
 
         if (MainActivity.isPh2()) {
             addField(Sid.ThermalComfortPower, 0);
@@ -135,6 +136,10 @@ public class DrivingAdvancedActivity extends CanzeActivity implements FieldListe
 
                 case Sid.ClimaLoopMode:
                     setTextValueFromField(findViewById(R.id.text_CLM), climate_Status, field);
+                    break;
+
+                case Sid.GPS_Altitude:
+                    setNumericValueFromField(findViewById(R.id.text_altitude), field);
                     break;
             }
         });
