@@ -11,11 +11,11 @@ android {
             keyPassword 'canze4us!'
         }
     }
-    compileSdk 33
+    compileSdk 34
 
     defaultConfig {
         applicationId "lu.fisch.canze.mscg"
-        minSdkVersion 21
+        minSdkVersion 26
         versionName '1.68beta2'
         versionCode 102
     }
