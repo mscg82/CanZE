@@ -178,15 +178,10 @@ public class DrivingAdvancedActivity extends CanzeActivity implements FieldListe
     }
 
     private static double averageValues(Deque<Double> values) {
-        int validValues = 0;
-        double sum = 0.0;
-        for (Double val : values) {
-            if (!Double.isInfinite(val)) {
-                sum += val;
-                validValues++;
-            }
-        }
-        return validValues != 0 ? sum / validValues : sum;
+        return values.stream()
+                .mapToDouble(Double::doubleValue) //
+                .average() //
+                .orElse(0);
     }
 
 }
