@@ -22,8 +22,9 @@
 package lu.fisch.canze.interfaces;
 
 import java.util.HashMap;
+
 import lu.fisch.canze.actors.Field;
 
 public interface VirtualFieldAction {
-    double updateValue(HashMap<String,Field> dependantFields);
+    double updateValue(HashMap<String,Field> dependantFields, Field updatedField);
 }

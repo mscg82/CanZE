@@ -37,9 +37,12 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.Deque;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Locale;
 
 import lu.fisch.canze.R;
@@ -184,7 +187,7 @@ public class Fields {
 
     private void addVirtualFieldUsage() {
         // It would be easier use SID_Consumption = "1fd.48" (dash kWh) instead of V*A
-        addVirtualFieldCommon("6100", "kWh/100km", Sid.TractionBatteryVoltage + ";" + Sid.TractionBatteryCurrent + ";" + Sid.RealSpeed, dependantFields -> {
+        addVirtualFieldCommon("6100", "kWh/100km", Arrays.asList(Sid.TractionBatteryVoltage, Sid.TractionBatteryCurrent, Sid.RealSpeed), (dependantFields, updatedField) -> {
             // get real speed
             Field privateField;
             if ((privateField = dependantFields.get(Sid.RealSpeed)) == null) return Double.NaN;
@@ -220,15 +223,17 @@ public class Fields {
 
         String unit = MainActivity.milesMode ? "mi/kWh" : "kWh/100km";
         int decimals = MainActivity.milesMode ? 2 : 1;
-        addVirtualFieldCommon("6500", decimals, unit, Sid.DcPowerOut + ";" + Sid.RealSpeed, dependantFields -> {
-            Field privateField;
-            if ((privateField = dependantFields.get(Sid.DcPowerOut)) != null) {
-                dcPwrs.removeFirst();
-                dcPwrs.addLast(privateField.getValue());
-            }
-            if ((privateField = dependantFields.get(Sid.RealSpeed)) != null) {
-                realSpeeds.removeFirst();
-                realSpeeds.addLast(privateField.getValue());
+        addVirtualFieldCommon("6500", decimals, unit, Arrays.asList(Sid.DcPowerOut, Sid.RealSpeed), (dependantFields, updatedField) -> {
+            switch (updatedField.getSID()) {
+                case Sid.DcPowerOut:
+                    dcPwrs.removeFirst();
+                    dcPwrs.addLast(updatedField.getValue());
+                    break;
+
+                case Sid.RealSpeed:
+                    realSpeeds.removeFirst();
+                    realSpeeds.addLast(updatedField.getValue());
+                    break;
             }
 
             double realSpeed = averageValues(realSpeeds);
@@ -262,7 +267,7 @@ public class Fields {
 
     private void addVirtualFieldFrictionTorque() {
         if (MainActivity.altFieldsMode || MainActivity.isPh2()) {
-            addVirtualFieldCommon("6101", "Nm", Sid.HydraulicTorqueRequest, dependantFields -> {
+            addVirtualFieldCommon("6101", "Nm", Collections.singletonList(Sid.HydraulicTorqueRequest), (dependantFields, updatedField) -> {
                 Field privateField;
                 if ((privateField = dependantFields.get(Sid.HydraulicTorqueRequest)) == null)
                     return Double.NaN;
@@ -270,7 +275,7 @@ public class Fields {
             });
 
         } else {
-            addVirtualFieldCommon("6101", "Nm", Sid.DriverBrakeWheel_Torque_Request + ";" + Sid.ElecBrakeWheelsTorqueApplied + ";" + Sid.Coasting_Torque, dependantFields -> {
+            addVirtualFieldCommon("6101", "Nm", Arrays.asList(Sid.DriverBrakeWheel_Torque_Request, Sid.ElecBrakeWheelsTorqueApplied, Sid.Coasting_Torque), (dependantFields, updatedField) -> {
                 Field privateField;
                 if ((privateField = dependantFields.get(Sid.DriverBrakeWheel_Torque_Request)) == null)
                     return Double.NaN;
@@ -290,7 +295,7 @@ public class Fields {
     private void addVirtualFieldElecBrakeTorque() {
 
         if (MainActivity.altFieldsMode || MainActivity.isPh2()) {
-            addVirtualFieldCommon("610a", "Nm", Sid.PEBTorque, dependantFields -> {
+            addVirtualFieldCommon("610a", "Nm", Collections.singletonList(Sid.PEBTorque), (dependantFields, updatedField) -> {
                 Field privateField;
                 if ((privateField = dependantFields.get(Sid.PEBTorque)) == null)
                     return Double.NaN;
@@ -299,7 +304,7 @@ public class Fields {
             });
 
         } else {
-            addVirtualFieldCommon("610a", "Nm", Sid.ElecBrakeWheelsTorqueApplied + ";" + Sid.Coasting_Torque, dependantFields -> {
+            addVirtualFieldCommon("610a", "Nm", Arrays.asList(Sid.ElecBrakeWheelsTorqueApplied, Sid.Coasting_Torque), (dependantFields, updatedField) -> {
                 Field privateField;
                 if ((privateField = dependantFields.get(Sid.ElecBrakeWheelsTorqueApplied)) == null)
                     return Double.NaN;
@@ -315,7 +320,7 @@ public class Fields {
     private void addVirtualFieldTotalPositiveTorque() {
 
         if (MainActivity.altFieldsMode || MainActivity.isPh2()) {
-            addVirtualFieldCommon("610b", "Nm", Sid.PEBTorque, dependantFields -> {
+            addVirtualFieldCommon("610b", "Nm", Collections.singletonList(Sid.PEBTorque), (dependantFields, updatedField) -> {
                 Field privateField;
                 if ((privateField = dependantFields.get(Sid.PEBTorque)) == null)
                     return Double.NaN;
@@ -324,7 +329,7 @@ public class Fields {
             });
 
         } else
-            addVirtualFieldCommon("610b", "Nm", Sid.MeanEffectiveTorque, dependantFields -> {
+            addVirtualFieldCommon("610b", "Nm", Collections.singletonList(Sid.MeanEffectiveTorque), (dependantFields, updatedField) -> {
                 Field privateField;
                 if ((privateField = dependantFields.get(Sid.MeanEffectiveTorque)) == null)
                     return Double.NaN;
@@ -335,7 +340,7 @@ public class Fields {
     private void addVirtualFieldTotalNegativeTorque() {
 
         if (MainActivity.altFieldsMode || MainActivity.isPh2()) {
-            addVirtualFieldCommon("610c", "Nm", Sid.PEBTorque + ";" + Sid.HydraulicTorqueRequest, dependantFields -> {
+            addVirtualFieldCommon("610c", "Nm", Arrays.asList(Sid.PEBTorque, Sid.HydraulicTorqueRequest), (dependantFields, updatedField) -> {
                 Field privateField;
                 if ((privateField = dependantFields.get(Sid.HydraulicTorqueRequest)) == null)
                     return Double.NaN;
@@ -347,7 +352,7 @@ public class Fields {
             });
 
         } else {
-            addVirtualFieldCommon("610c", "Nm", Sid.DriverBrakeWheel_Torque_Request + ";" + Sid.Coasting_Torque, dependantFields -> {
+            addVirtualFieldCommon("610c", "Nm", Arrays.asList(Sid.DriverBrakeWheel_Torque_Request, Sid.Coasting_Torque), (dependantFields, updatedField) -> {
                 Field privateField;
                 if ((privateField = dependantFields.get(Sid.DriverBrakeWheel_Torque_Request)) == null)
                     return Double.NaN;
@@ -383,7 +388,7 @@ public class Fields {
     */
     private void addVirtualFieldDcPowerIn() {
         // positive = charging, negative = discharging. Unusable for consumption graphs
-        addVirtualFieldCommon("6103", 1, "kW", Sid.TractionBatteryVoltage + ";" + Sid.TractionBatteryCurrent, dependantFields -> {
+        addVirtualFieldCommon("6103", 1, "kW", Arrays.asList(Sid.TractionBatteryVoltage, Sid.TractionBatteryCurrent), (dependantFields, updatedField) -> {
             Field privateField;
             if ((privateField = dependantFields.get(Sid.TractionBatteryVoltage)) == null) {
                 return Double.NaN;
@@ -399,7 +404,7 @@ public class Fields {
 
     private void addVirtualFieldDcPowerOut() {
         // positive = discharging, negative = charging. Unusable for charging graphs
-        addVirtualFieldCommon("6109", 1, "kW", Sid.TractionBatteryVoltage + ";" + Sid.TractionBatteryCurrent, dependantFields -> {
+        addVirtualFieldCommon("6109", 1, "kW", Arrays.asList(Sid.TractionBatteryVoltage, Sid.TractionBatteryCurrent), (dependantFields, updatedField) -> {
             Field privateField;
             if ((privateField = dependantFields.get(Sid.TractionBatteryVoltage)) == null) {
                 return Double.NaN;
@@ -417,7 +422,7 @@ public class Fields {
         // need to use real timer. Now the averaging is dependant on dongle speed
         final String SID_VirtualUsage = "800.6100.24";
 
-        addVirtualFieldCommon("6104", 1, "kWh/100km", SID_VirtualUsage, dependantFields -> {
+        addVirtualFieldCommon("6104", 1, "kWh/100km", Collections.singletonList(SID_VirtualUsage), (dependantFields, updatedField) -> {
             Field privateField;
             if ((privateField = dependantFields.get(SID_VirtualUsage)) == null) return Double.NaN;
             double value = privateField.getValue();
@@ -438,7 +443,7 @@ public class Fields {
 
 
         if (MainActivity.isPh2()) {
-            addVirtualFieldCommon("6105", 1, "°C", Sid.OH_ClimTempDisplay, dependantFields -> {
+            addVirtualFieldCommon("6105", 1, "°C", Collections.singletonList(Sid.OH_ClimTempDisplay), (dependantFields, updatedField) -> {
                 Field privateField;
                 if ((privateField = dependantFields.get(Sid.OH_ClimTempDisplay)) == null)
                     return Double.NaN;
@@ -454,7 +459,7 @@ public class Fields {
             });
 
         } else if (MainActivity.altFieldsMode) {
-            addVirtualFieldCommon("6105", "°C", Sid.OH_ClimTempDisplay, dependantFields -> {
+            addVirtualFieldCommon("6105", "°C", Collections.singletonList(Sid.OH_ClimTempDisplay), (dependantFields, updatedField) -> {
                 Field privateField;
                 if ((privateField = dependantFields.get(Sid.OH_ClimTempDisplay)) == null)
                     return Double.NaN;
@@ -470,7 +475,7 @@ public class Fields {
             });
 
         } else {
-            addVirtualFieldCommon("6105", "°C", Sid.HeaterSetpoint, dependantFields -> {
+            addVirtualFieldCommon("6105", "°C", Collections.singletonList(Sid.HeaterSetpoint), (dependantFields, updatedField) -> {
                 Field privateField;
                 if ((privateField = dependantFields.get(Sid.HeaterSetpoint)) == null)
                     return Double.NaN;
@@ -492,7 +497,7 @@ public class Fields {
         if (Double.isNaN(realRangeReference))
             realRangeReference = CanzeDataSource.getInstance().getLast(Sid.RangeEstimate);
 
-        addVirtualFieldCommon("6106", "km", Sid.EVC_Odometer + ";" + Sid.RangeEstimate, dependantFields -> {
+        addVirtualFieldCommon("6106", "km", Arrays.asList(Sid.EVC_Odometer, Sid.RangeEstimate), (dependantFields, updatedField) -> {
             Field privateField;
             if ((privateField = dependantFields.get(Sid.EVC_Odometer)) == null) return Double.NaN;
             double odo = privateField.getValue();
@@ -533,7 +538,7 @@ public class Fields {
             realRangeReference = CanzeDataSource.getInstance().getLast(Sid.RangeEstimate);
         }
 
-        addVirtualFieldCommon("6107", "km", Sid.EVC_Odometer + ";" + Sid.RangeEstimate, dependantFields -> {
+        addVirtualFieldCommon("6107", "km", Arrays.asList(Sid.EVC_Odometer, Sid.RangeEstimate), (dependantFields, updatedField) -> {
             Field privateField;
             if ((privateField = dependantFields.get(Sid.EVC_Odometer)) == null) return Double.NaN;
             double odo = privateField.getValue();
@@ -572,7 +577,7 @@ public class Fields {
             realRangeReference2 = CanzeDataSource.getInstance().getLast(Sid.RangeEstimate);
         }
 
-        addVirtualFieldCommon("6108", "km", Sid.EVC_Odometer + ";" + Sid.RangeEstimate, dependantFields -> {
+        addVirtualFieldCommon("6108", "km", Arrays.asList(Sid.EVC_Odometer, Sid.RangeEstimate), (dependantFields, updatedField) -> {
             Field privateField;
             if ((privateField = dependantFields.get(Sid.EVC_Odometer)) == null) return Double.NaN;
             double odo = privateField.getValue();
@@ -608,7 +613,7 @@ public class Fields {
 
     private void addVirtualFieldPilotAmp() {
         if (MainActivity.altFieldsMode || MainActivity.isPh2()) {
-            addVirtualFieldCommon("610d", "A", Sid.ACPilotDutyCycle, dependantFields -> {
+            addVirtualFieldCommon("610d", "A", Collections.singletonList(Sid.ACPilotDutyCycle), (dependantFields, updatedField) -> {
                 Field privateField;
                 if ((privateField = dependantFields.get(Sid.ACPilotDutyCycle)) == null)
                     return Double.NaN;
@@ -617,7 +622,7 @@ public class Fields {
             });
 
         } else {
-            addVirtualFieldCommon("610d", "A", Sid.ACPilotAmps, dependantFields -> {
+            addVirtualFieldCommon("610d", "A", Collections.singletonList(Sid.ACPilotAmps), (dependantFields, updatedField) -> {
                 Field privateField;
                 if ((privateField = dependantFields.get(Sid.ACPilotAmps)) == null)
                     return Double.NaN;
@@ -686,7 +691,7 @@ public class Fields {
     }
 
     private void addVirtualFieldAltitude() {
-        addVirtualFieldCommon("610f", 1, "m", (short) 0x8ff, Sid.GPS, dependantFields -> {
+        addVirtualFieldCommon("610f", 1, "m", (short) 0x8ff, Collections.singletonList(Sid.GPS), (dependantFields, updatedField) -> {
             Field privateField;
             if ((privateField = dependantFields.get(Sid.GPS)) == null) return Double.NaN;
             String value = privateField.getStringValue();
@@ -698,19 +703,19 @@ public class Fields {
         });
     }
 
-    private void addVirtualFieldCommon(String virtualId, String unit, String dependantSids, VirtualFieldAction virtualFieldAction) {
+    private void addVirtualFieldCommon(String virtualId, String unit, List<String> dependantSids, VirtualFieldAction virtualFieldAction) {
         addVirtualFieldCommon(virtualId, 0, unit, (short) 0, dependantSids, virtualFieldAction);
     }
 
-    private void addVirtualFieldCommon(String virtualId, int decimals, String unit, String dependantSids, VirtualFieldAction virtualFieldAction) {
+    private void addVirtualFieldCommon(String virtualId, int decimals, String unit, List<String> dependantSids, VirtualFieldAction virtualFieldAction) {
         addVirtualFieldCommon(virtualId, decimals, unit, (short) 0, dependantSids, virtualFieldAction);
     }
 
-    private void addVirtualFieldCommon(String virtualId, int decimals, String unit, short options, String dependantSids, VirtualFieldAction virtualFieldAction) {
+    private void addVirtualFieldCommon(String virtualId, int decimals, String unit, short options, List<String> dependantSids, VirtualFieldAction virtualFieldAction) {
         // create a list of field this new virtual field will depend on
         HashMap<String, Field> dependantFields = new HashMap<>();
         boolean allOk = true;
-        for (String sid : dependantSids.split(";")) {
+        for (String sid : dependantSids) {
             Field field = getBySID(sid);
             if (field != null) {
                 if (!field.getResponseId().equals("999999")) {

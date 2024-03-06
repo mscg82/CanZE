@@ -41,7 +41,7 @@ public class VirtualField extends Field implements FieldListener {
     @Override
     public void onFieldUpdateEvent(Field field) {
         if(virtualFieldAction!=null) {
-            setValue(virtualFieldAction.updateValue(dependantFields));
+            setValue(virtualFieldAction.updateValue(dependantFields, field));
         }
     }
 
