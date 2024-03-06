@@ -129,6 +129,8 @@ public class Sid {
     public static final String ACPilot                              = "800.610d.24";
     public static final String GPS                                  = "800.610e.24";
     public static final String GPS_Altitude                         = "800.610f.24";
+    public static final String InstantConsumptionByAverage          = "800.6500.24";
+    public static final String InstantConsumptionByIntegration      = "800.6501.24";
 
     public static final String CCSEVSEMaxPower                      = "18daf1da.623006.24";
     public static final String CCSEVSEMaxVoltage                    = "18daf1da.623008.24";

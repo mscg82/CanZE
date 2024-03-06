@@ -25,9 +25,9 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.TextView;
 
-import java.util.ArrayDeque;
-import java.util.Deque;
 import java.util.Locale;
+import java.util.Optional;
+import java.util.function.DoubleFunction;
 
 import lu.fisch.canze.R;
 import lu.fisch.canze.actors.Field;
@@ -44,19 +44,6 @@ public class DrivingAdvancedActivity extends CanzeActivity implements FieldListe
             : R.array.list_ConditioningStatus);
     private final String[] climate_Status = MainActivity.getStringList(MainActivity.isPh2() ? R.array.list_ClimateStatusPh2
             : R.array.list_ClimateStatus);
-
-    private final Deque<Double> realSpeeds;
-    private final Deque<Double> dcPwrs;
-
-    public DrivingAdvancedActivity() {
-        int maxValues = 5;
-        this.realSpeeds = new ArrayDeque<>(maxValues);
-        this.dcPwrs = new ArrayDeque<>(maxValues);
-        for (int i = 1; i <= maxValues; i++) {
-            realSpeeds.add(Double.NEGATIVE_INFINITY);
-            dcPwrs.add(Double.NEGATIVE_INFINITY);
-        }
-    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -77,7 +64,7 @@ public class DrivingAdvancedActivity extends CanzeActivity implements FieldListe
         addField(Sid.Pressure, 1000);
         addField(Sid.BatteryConditioningMode, 0);
         addField(Sid.ClimaLoopMode, 0);
-        addField(Sid.RealSpeed, 0);
+        addField(Sid.InstantConsumptionByAverage, 0);
         addField(Sid.GPS_Altitude, 5000);
 
         if (MainActivity.isPh2()) {
@@ -98,20 +85,17 @@ public class DrivingAdvancedActivity extends CanzeActivity implements FieldListe
             // get the text field
             switch (field.getSID()) {
 
-                case Sid.RealSpeed:
-                    realSpeeds.removeFirst();
-                    realSpeeds.addLast(field.getValue());
-                    showInstantConsumption();
-                    break;
-
                 case Sid.EngineFanSpeed:
                     setNumericValueFromField(findViewById(R.id.text_EFS), field);
                     break;
 
-                case Sid.DcPowerOut:
-                    dcPwrs.removeFirst();
-                    dcPwrs.addLast(field.getValue());
-                    showInstantConsumption();
+                case Sid.InstantConsumptionByAverage:
+                    setNumericValueFromField(findViewById(R.id.text_instant_consumption),
+                            MainActivity.milesMode ? "%.2f" : "%.1f",
+                            field,
+                            val -> Double.isNaN(val) ?
+                                    Optional.of(MainActivity.getStringSingle(R.string.default_Dash)) :
+                                    Optional.empty());
                     break;
 
                 case Sid.ThermalComfortPower:
@@ -146,10 +130,14 @@ public class DrivingAdvancedActivity extends CanzeActivity implements FieldListe
 
     }
 
-    private void setNumericValueFromField(TextView tv, Field field)
-    {
+    private void setNumericValueFromField(TextView tv, Field field) {
+        setNumericValueFromField(tv, "%.1f", field, val -> Optional.empty());
+    }
+
+    private void setNumericValueFromField(TextView tv, String format, Field field, DoubleFunction<Optional<String>> nanHandler) {
         if (tv != null) {
-            tv.setText(String.format(Locale.getDefault(), "%.1f", field.getValue()));
+            tv.setText(nanHandler.apply(field.getValue())
+                    .orElseGet(() -> String.format(Locale.getDefault(), format, field.getValue())));
         }
     }
 
@@ -158,30 +146,6 @@ public class DrivingAdvancedActivity extends CanzeActivity implements FieldListe
         if (tv != null && values != null && value >= 0 && value < values.length) {
             tv.setText(values[value]);
         }
-    }
-
-    private void showInstantConsumption() {
-        double realSpeed = averageValues(realSpeeds);
-        double dcPwr = averageValues(dcPwrs);
-
-        String instantConsumption;
-        if (!MainActivity.milesMode && !Double.isNaN(realSpeed) && realSpeed > 5 && !Double.isNaN(dcPwr)) {
-            instantConsumption = String.format(Locale.getDefault(), "%.1f", 100.0 * dcPwr / realSpeed);
-        } else if (MainActivity.milesMode && !Double.isNaN(dcPwr) && dcPwr != 0) {
-            instantConsumption = String.format(Locale.getDefault(), "%.2f", realSpeed / dcPwr);
-        } else {
-            instantConsumption = MainActivity.getStringSingle(R.string.default_Dash);
-        }
-
-        TextView instantConsumptionText = findViewById(R.id.text_instant_consumption);
-        instantConsumptionText.setText(instantConsumption);
-    }
-
-    private static double averageValues(Deque<Double> values) {
-        return values.stream()
-                .mapToDouble(Double::doubleValue) //
-                .average() //
-                .orElse(0);
     }
 
 }

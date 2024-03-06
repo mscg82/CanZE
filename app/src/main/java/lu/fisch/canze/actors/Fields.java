@@ -35,8 +35,10 @@ import android.os.Bundle;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Deque;
 import java.util.HashMap;
 import java.util.Locale;
 
@@ -95,7 +97,6 @@ public class Fields {
 
     private void addVirtualFields() {
         addVirtualFieldUsage();
-        addVirtualFieldUsageByIntegration();
         addVirtualFieldUsageLpf();
         addVirtualFieldFrictionTorque();
         //addVirtualFieldFrictionPower();
@@ -109,6 +110,8 @@ public class Fields {
         addVirtualFieldRealDelta();
         addVirtualFieldRealDeltaNoReset();
         addVirtualFieldPilotAmp();
+        addVirtualFieldUsageByAverage();
+        addVirtualFieldUsageByIntegration();
         addVirtualFieldGps();
         addVirtualFieldAltitude();
     }
@@ -119,6 +122,9 @@ public class Fields {
                 addVirtualFieldUsage();
                 break;
             case "6500":
+                addVirtualFieldUsageByAverage();
+                break;
+            case "6501":
                 addVirtualFieldUsageByIntegration();
                 break;
             case "6104":
@@ -201,6 +207,53 @@ public class Fields {
             else if (usage > 150) return 150;
             else return usage;
         });
+    }
+
+    private void addVirtualFieldUsageByAverage() {
+        int maxValues = 5;
+        Deque<Double> realSpeeds = new ArrayDeque<>(maxValues);
+        Deque<Double> dcPwrs = new ArrayDeque<>(maxValues);
+        for (int i = 1; i <= maxValues; i++) {
+            realSpeeds.add(Double.NEGATIVE_INFINITY);
+            dcPwrs.add(Double.NEGATIVE_INFINITY);
+        }
+
+        String unit = MainActivity.milesMode ? "mi/kWh" : "kWh/100km";
+        int decimals = MainActivity.milesMode ? 2 : 1;
+        addVirtualFieldCommon("6500", decimals, unit, Sid.DcPowerOut + ";" + Sid.RealSpeed, dependantFields -> {
+            Field privateField;
+            if ((privateField = dependantFields.get(Sid.DcPowerOut)) != null) {
+                dcPwrs.removeFirst();
+                dcPwrs.addLast(privateField.getValue());
+            }
+            if ((privateField = dependantFields.get(Sid.RealSpeed)) != null) {
+                realSpeeds.removeFirst();
+                realSpeeds.addLast(privateField.getValue());
+            }
+
+            double realSpeed = averageValues(realSpeeds);
+            double dcPwr = averageValues(dcPwrs);
+
+            if (Double.isNaN(dcPwr) || Double.isNaN(realSpeed)) {
+                return Double.NaN;
+            }
+
+            if (!MainActivity.milesMode && realSpeed > 5) {
+                return Math.round((100.0 * dcPwr / realSpeed) * 10) / 10.0;
+            } else if (MainActivity.milesMode && dcPwr != 0) {
+                return Math.round((realSpeed / dcPwr) * 100) / 100.0;
+            } else {
+                return Double.NaN;
+            }
+        });
+    }
+
+    private static double averageValues(Deque<Double> values) {
+        return values.stream()
+                .mapToDouble(Double::doubleValue)
+                .filter(val -> val != Double.NEGATIVE_INFINITY)
+                .average()
+                .orElse(0);
     }
 
     private void addVirtualFieldUsageByIntegration() {
