@@ -31,6 +31,7 @@ import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
+import android.util.Log;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
@@ -326,14 +327,18 @@ public class Fields {
 
             @Override
             public double updateValue(HashMap<String, Field> dependantFields, Field updatedField) {
+                Instant now = Instant.now();
+
+                double voltageToLog = lastVoltage;
+                double currentToLog = lastCurrent;
                 switch (updatedField.getSID()) {
                     case Sid.TractionBatteryVoltage:
-                        lastVoltage = updatedField.getValue();
+                        voltageToLog = lastVoltage = updatedField.getValue();
                         computePower();
                         break;
 
                     case Sid.TractionBatteryCurrent:
-                        lastCurrent = updatedField.getValue();
+                        currentToLog = lastCurrent = updatedField.getValue();
                         computePower();
                         break;
 
@@ -344,6 +349,22 @@ public class Fields {
 
                 double realSpeed = averageValues(realSpeeds);
                 double dcPwr = averageValues(dcPwrs);
+
+                Log.i(MainActivity.TAG + "-test", String.format(Locale.US, "Received %s, value %.3f at %s (%d)",
+                        updatedField.getSID(), updatedField.getValue(), now, now.toEpochMilli()));
+                Log.i(MainActivity.TAG + "-test", String.format(Locale.US, "Last voltage: %.3f", voltageToLog));
+                Log.i(MainActivity.TAG + "-test", String.format(Locale.US, "last current: %.3f", currentToLog));
+                Log.i(MainActivity.TAG + "-test", String.format(Locale.US, "Speeds: %s, mean: %.3f", realSpeeds, realSpeed));
+                Log.i(MainActivity.TAG + "-test", String.format(Locale.US, "Powers: %s, mean: %.3f", dcPwrs, dcPwr));
+
+                Log.i(MainActivity.TAG + "-test-csv", "#field_id;value;when;timestamp;last_voltage;last_current;speeds_cache;speed;powers_cache;power");
+                Log.i(MainActivity.TAG + "-test-csv", String.format(Locale.US,
+                        "%s;%.3f;\"%s\";%d;%.3f;%.3f;\"%s\";%.3f;\"%s\";%.3f",
+                        updatedField.getSID(), updatedField.getValue(),
+                        now, now.toEpochMilli(),
+                        voltageToLog, currentToLog,
+                        realSpeeds, realSpeed,
+                        dcPwrs, dcPwr));
 
                 if (Double.isNaN(dcPwr) || Double.isNaN(realSpeed)) {
                     return Double.NaN;
