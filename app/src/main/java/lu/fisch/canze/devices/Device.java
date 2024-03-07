@@ -21,10 +21,13 @@
 
 package lu.fisch.canze.devices;
 
+import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Deque;
 
 import lu.fisch.canze.activities.MainActivity;
 import lu.fisch.canze.actors.Field;
@@ -540,12 +543,29 @@ public abstract class Device {
         }
         // register real fields on which a virtual field may depend
         else {
-            VirtualField virtualField = (VirtualField) field;
-            for (Field realField : virtualField.getFields()) {
+            Collection<Field> realFields = linearizeRealFields(field);
+
+            for (Field realField : realFields) {
                 // increase interval
-                addActivityField(realField, interval * virtualField.getFields().size());
+                addActivityField(realField, interval * realFields.size());
             }
         }
+    }
+
+    private Collection<Field> linearizeRealFields(Field field)
+    {
+        Deque<Field> realFields = new ArrayDeque<>();
+        Deque<Field> fieldsToAnalyze = new ArrayDeque<>();
+        fieldsToAnalyze.addFirst(field);
+        while (!fieldsToAnalyze.isEmpty()) {
+            Field current = fieldsToAnalyze.removeFirst();
+            if (current instanceof VirtualField) {
+                fieldsToAnalyze.addAll(((VirtualField) current).getFields());
+            } else {
+                realFields.addFirst(current);
+            }
+        }
+        return realFields;
     }
 
     public void removeActivityField(final Field field) {
