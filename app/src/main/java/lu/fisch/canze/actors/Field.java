@@ -27,12 +27,13 @@
 package lu.fisch.canze.actors;
 
 import androidx.annotation.NonNull;
-import lu.fisch.canze.activities.MainActivity;
-import lu.fisch.canze.interfaces.FieldListener;
 
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Locale;
+
+import lu.fisch.canze.activities.MainActivity;
+import lu.fisch.canze.interfaces.FieldListener;
 
 /**
  * @author robertfisch
@@ -228,13 +229,7 @@ public class Field {
                 final FieldListener fieldListener = fieldListeners.get(i);
                 final Field fieldClone = this.fieldClone();
                 if (fieldListener != null) {
-                    (new Thread(new Runnable() {
-
-                        @Override
-                        public void run() {
-                            fieldListener.onFieldUpdateEvent(fieldClone);
-                        }
-                    })).start();
+                    (new Thread(() -> fieldListener.onFieldUpdateEvent(fieldClone))).start();
                 }
             }
         }
@@ -300,7 +295,13 @@ public class Field {
 
     public void setValue(double value) {
         this.value = value;
-        if (!Double.isNaN(value)) notifyFieldListeners();
+        if (isValueNotifiable(value)) {
+            notifyFieldListeners();
+        }
+    }
+
+    protected boolean isValueNotifiable(double value) {
+        return !Double.isNaN(value);
     }
 
     public void setValue(String value) {

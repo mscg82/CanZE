@@ -223,34 +223,35 @@ public class Fields {
 
         String unit = MainActivity.milesMode ? "mi/kWh" : "kWh/100km";
         int decimals = MainActivity.milesMode ? 2 : 1;
-        addVirtualFieldCommon("6500", decimals, unit, Arrays.asList(Sid.DcPowerOut, Sid.RealSpeed), (dependantFields, updatedField) -> {
-            switch (updatedField.getSID()) {
-                case Sid.DcPowerOut:
-                    dcPwrs.removeFirst();
-                    dcPwrs.addLast(updatedField.getValue());
-                    break;
+        addVirtualFieldCommon("6500", decimals, unit, (short) 0, Arrays.asList(Sid.DcPowerOut, Sid.RealSpeed), true,
+                (dependantFields, updatedField) -> {
+                    switch (updatedField.getSID()) {
+                        case Sid.DcPowerOut:
+                            dcPwrs.removeFirst();
+                            dcPwrs.addLast(updatedField.getValue());
+                            break;
 
-                case Sid.RealSpeed:
-                    realSpeeds.removeFirst();
-                    realSpeeds.addLast(updatedField.getValue());
-                    break;
-            }
+                        case Sid.RealSpeed:
+                            realSpeeds.removeFirst();
+                            realSpeeds.addLast(updatedField.getValue());
+                            break;
+                    }
 
-            double realSpeed = averageValues(realSpeeds);
-            double dcPwr = averageValues(dcPwrs);
+                    double realSpeed = averageValues(realSpeeds);
+                    double dcPwr = averageValues(dcPwrs);
 
-            if (Double.isNaN(dcPwr) || Double.isNaN(realSpeed)) {
-                return Double.NaN;
-            }
+                    if (Double.isNaN(dcPwr) || Double.isNaN(realSpeed)) {
+                        return Double.NaN;
+                    }
 
-            if (!MainActivity.milesMode && realSpeed > 5) {
-                return Math.round((100.0 * dcPwr / realSpeed) * 10) / 10.0;
-            } else if (MainActivity.milesMode && dcPwr != 0) {
-                return Math.round((realSpeed / dcPwr) * 100) / 100.0;
-            } else {
-                return Double.NaN;
-            }
-        });
+                    if (!MainActivity.milesMode && realSpeed > 5) {
+                        return Math.round((100.0 * dcPwr / realSpeed) * 10) / 10.0;
+                    } else if (MainActivity.milesMode && dcPwr != 0) {
+                        return Math.round((realSpeed / dcPwr) * 100) / 100.0;
+                    } else {
+                        return Double.NaN;
+                    }
+                });
     }
 
     private static double averageValues(Deque<Double> values) {
@@ -691,7 +692,7 @@ public class Fields {
     }
 
     private void addVirtualFieldAltitude() {
-        addVirtualFieldCommon("610f", 1, "m", (short) 0x8ff, Collections.singletonList(Sid.GPS), (dependantFields, updatedField) -> {
+        addVirtualFieldCommon("610f", 1, "m", (short) 0x8ff, Collections.singletonList(Sid.GPS), false, (dependantFields, updatedField) -> {
             Field privateField;
             if ((privateField = dependantFields.get(Sid.GPS)) == null) return Double.NaN;
             String value = privateField.getStringValue();
@@ -704,14 +705,14 @@ public class Fields {
     }
 
     private void addVirtualFieldCommon(String virtualId, String unit, List<String> dependantSids, VirtualFieldAction virtualFieldAction) {
-        addVirtualFieldCommon(virtualId, 0, unit, (short) 0, dependantSids, virtualFieldAction);
+        addVirtualFieldCommon(virtualId, 0, unit, (short) 0, dependantSids, false, virtualFieldAction);
     }
 
     private void addVirtualFieldCommon(String virtualId, int decimals, String unit, List<String> dependantSids, VirtualFieldAction virtualFieldAction) {
-        addVirtualFieldCommon(virtualId, decimals, unit, (short) 0, dependantSids, virtualFieldAction);
+        addVirtualFieldCommon(virtualId, decimals, unit, (short) 0, dependantSids, false, virtualFieldAction);
     }
 
-    private void addVirtualFieldCommon(String virtualId, int decimals, String unit, short options, List<String> dependantSids, VirtualFieldAction virtualFieldAction) {
+    private void addVirtualFieldCommon(String virtualId, int decimals, String unit, short options, List<String> dependantSids, boolean notifyNan, VirtualFieldAction virtualFieldAction) {
         // create a list of field this new virtual field will depend on
         HashMap<String, Field> dependantFields = new HashMap<>();
         boolean allOk = true;
@@ -735,7 +736,7 @@ public class Fields {
                 MainActivity.debug("frame does not exist:0x800");
                 return;
             }
-            VirtualField virtualField = new VirtualField(virtualId, dependantFields, decimals, unit, options, virtualFieldAction);
+            VirtualField virtualField = new VirtualField(virtualId, dependantFields, decimals, unit, options, notifyNan, virtualFieldAction);
             // a virtualfield is always ISO-TP, so we need to create a subframe for it
             Frame subFrame = Frames.getInstance().getById(0x800, virtualField.getResponseId());
             if (subFrame == null) {

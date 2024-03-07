@@ -17,13 +17,17 @@ public class VirtualField extends Field implements FieldListener {
     // the method to be executed for the calculation of this field
     private final VirtualFieldAction virtualFieldAction;
 
+    private final boolean notifyNan;
 
-    public VirtualField(String responseId, HashMap<String,Field> dependantFields, int decimals, String unit, short options, VirtualFieldAction virtualFieldAction)
+
+    public VirtualField(String responseId, HashMap<String,Field> dependantFields, int decimals,
+                        String unit, short options, boolean notifyNan,
+                        VirtualFieldAction virtualFieldAction)
     {
         // virtual frame added in the initialization block
         // super(Frames.getInstance().createVirtualIfNotExists(id), 0, 0, 1, 1, 0, unit, "", "", 0);
         // We're creating a new Field, frame 800, bit position 24-31, resolution 1, decimals 0, offset 0, given unit, empty requestId, given responseId, generic car
-        super("", Frames.getInstance().getById(0x800), (short)24, (short)31, 1, 0, 0, unit, responseId, options, null, null);
+        super("", Frames.getInstance().getById(0x800), (short)24, (short)31, 1, decimals, 0, unit, responseId, options, null, null);
 
         // register dependant listeners
         for (Field field : dependantFields.values()) {
@@ -34,8 +38,7 @@ public class VirtualField extends Field implements FieldListener {
         this.dependantFields    = dependantFields;
         this.virtualFieldAction = virtualFieldAction;
         this.virtual            = true;
-        this.setUnit(unit);
-        this.setDecimals(decimals);
+        this.notifyNan = notifyNan;
     }
 
     @Override
@@ -60,5 +63,10 @@ public class VirtualField extends Field implements FieldListener {
     public Collection<Field> getFields()
     {
         return dependantFields.values();
+    }
+
+    @Override
+    protected boolean isValueNotifiable(double value) {
+        return notifyNan || super.isValueNotifiable(value);
     }
 }
