@@ -474,8 +474,9 @@ public abstract class Device {
         }
         // register real fields on which a virtual field may depend
         else {
-            VirtualField virtualField = (VirtualField) field;
-            for (Field realField : virtualField.getFields()) {
+            Collection<Field> realFields = linearizeRealFields(field);
+
+            for (Field realField : realFields) {
                 addActivityField(realField);
             }
         }
@@ -603,10 +604,11 @@ public abstract class Device {
         }
         // register real fields on which a virtual field may depend
         else {
-            VirtualField virtualField = (VirtualField) field;
-            for (Field realField : virtualField.getFields()) {
+            Collection<Field> realFields = linearizeRealFields(field);
+
+            for (Field realField : realFields) {
                 // increase interval
-                addApplicationField(realField, interval * virtualField.getFields().size());
+                addApplicationField(realField, interval * realFields.size());
             }
         }
 
