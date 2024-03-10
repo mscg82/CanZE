@@ -213,51 +213,73 @@ public class Fields {
     }
 
     private void addVirtualFieldUsageByAverage() {
-        int maxValues = 5;
-        Deque<Double> realSpeeds = new ArrayDeque<>(maxValues);
-        Deque<Double> dcPwrs = new ArrayDeque<>(maxValues);
-        for (int i = 1; i <= maxValues; i++) {
-            realSpeeds.add(Double.NEGATIVE_INFINITY);
-            dcPwrs.add(Double.NEGATIVE_INFINITY);
+        class UsageByAverageAction implements VirtualFieldAction {
+
+            private static final int MAX_VALUES = 5;
+            private final Deque<Double> realSpeeds;
+            private final Deque<Double> dcPwrs;
+
+            public UsageByAverageAction() {
+                this.realSpeeds = new ArrayDeque<>(MAX_VALUES);
+                this.dcPwrs = new ArrayDeque<>(MAX_VALUES);
+                emptyValues();
+            }
+
+            @Override
+            public double updateValue(HashMap<String, Field> dependantFields, Field updatedField) {
+                switch (updatedField.getSID()) {
+                    case Sid.DcPowerOut:
+                        appendValue(dcPwrs, updatedField);
+                        break;
+
+                    case Sid.RealSpeed:
+                        appendValue(realSpeeds, updatedField);
+                        break;
+                }
+
+                double realSpeed = averageValues(realSpeeds);
+                double dcPwr = averageValues(dcPwrs);
+
+                if (Double.isNaN(dcPwr) || Double.isNaN(realSpeed)) {
+                    return Double.NaN;
+                }
+
+                if (!MainActivity.milesMode && realSpeed > 5) {
+                    return Math.round((100.0 * dcPwr / realSpeed) * 10) / 10.0;
+                } else if (MainActivity.milesMode && dcPwr != 0) {
+                    return Math.round((realSpeed / dcPwr) * 100) / 100.0;
+                } else {
+                    return Double.NaN;
+                }
+            }
+
+            private void emptyValues() {
+                this.realSpeeds.clear();
+                this.dcPwrs.clear();
+            }
+
+            private void appendValue(Deque<Double> values, Field updatedField) {
+                if (values.size() == MAX_VALUES) {
+                    values.removeFirst();
+                }
+                values.addLast(updatedField.getValue());
+            }
+
+            @Override
+            public void reset() {
+                emptyValues();
+            }
         }
 
         String unit = MainActivity.milesMode ? "mi/kWh" : "kWh/100km";
         int decimals = MainActivity.milesMode ? 2 : 1;
         addVirtualFieldCommon("6500", decimals, unit, (short) 0, Arrays.asList(Sid.DcPowerOut, Sid.RealSpeed), true,
-                (dependantFields, updatedField) -> {
-                    switch (updatedField.getSID()) {
-                        case Sid.DcPowerOut:
-                            dcPwrs.removeFirst();
-                            dcPwrs.addLast(updatedField.getValue());
-                            break;
-
-                        case Sid.RealSpeed:
-                            realSpeeds.removeFirst();
-                            realSpeeds.addLast(updatedField.getValue());
-                            break;
-                    }
-
-                    double realSpeed = averageValues(realSpeeds);
-                    double dcPwr = averageValues(dcPwrs);
-
-                    if (Double.isNaN(dcPwr) || Double.isNaN(realSpeed)) {
-                        return Double.NaN;
-                    }
-
-                    if (!MainActivity.milesMode && realSpeed > 5) {
-                        return Math.round((100.0 * dcPwr / realSpeed) * 10) / 10.0;
-                    } else if (MainActivity.milesMode && dcPwr != 0) {
-                        return Math.round((realSpeed / dcPwr) * 100) / 100.0;
-                    } else {
-                        return Double.NaN;
-                    }
-                });
+                new UsageByAverageAction());
     }
 
     private static double averageValues(Deque<Double> values) {
         return values.stream()
                 .mapToDouble(Double::doubleValue)
-                .filter(val -> val != Double.NEGATIVE_INFINITY)
                 .average()
                 .orElse(0);
     }

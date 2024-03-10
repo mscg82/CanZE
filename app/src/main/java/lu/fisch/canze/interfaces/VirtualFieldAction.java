@@ -25,6 +25,11 @@ import java.util.HashMap;
 
 import lu.fisch.canze.actors.Field;
 
+@FunctionalInterface
 public interface VirtualFieldAction {
     double updateValue(HashMap<String,Field> dependantFields, Field updatedField);
+
+    default void reset() {
+        // do nothing in the default impl
+    }
 }

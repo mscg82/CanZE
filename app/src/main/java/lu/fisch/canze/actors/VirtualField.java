@@ -43,7 +43,7 @@ public class VirtualField extends Field implements FieldListener {
 
     @Override
     public void onFieldUpdateEvent(Field field) {
-        if(virtualFieldAction!=null) {
+        if (virtualFieldAction != null) {
             setValue(virtualFieldAction.updateValue(dependantFields, field));
         }
     }
@@ -57,6 +57,9 @@ public class VirtualField extends Field implements FieldListener {
         // remove listeners to dependant listeners
         for (Field field : dependantFields.values()) {
             fieldListeners.remove(this);
+        }
+        if (virtualFieldAction != null) {
+            virtualFieldAction.reset();
         }
     }
 
