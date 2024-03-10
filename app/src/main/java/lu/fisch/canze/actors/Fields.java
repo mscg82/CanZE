@@ -266,9 +266,10 @@ public class Fields {
             {
                 if (!Double.isNaN(lastCurrent) && !Double.isNaN(lastVoltage)) {
                     appendValue(dcPwrs, lastCurrent * lastCurrent * -1000);
+
+                    lastCurrent = Double.NaN;
+                    lastVoltage= Double.NaN;
                 }
-                lastCurrent = Double.NaN;
-                lastVoltage= Double.NaN;
             }
 
             private void emptyValues() {
