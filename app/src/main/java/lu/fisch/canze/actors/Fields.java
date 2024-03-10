@@ -265,7 +265,7 @@ public class Fields {
             private void computePower()
             {
                 if (!Double.isNaN(lastCurrent) && !Double.isNaN(lastVoltage)) {
-                    appendValue(dcPwrs, lastCurrent * lastCurrent * -1000);
+                    appendValue(dcPwrs, lastCurrent * lastVoltage / -1000.0);
 
                     lastCurrent = Double.NaN;
                     lastVoltage= Double.NaN;
