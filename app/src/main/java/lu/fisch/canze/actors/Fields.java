@@ -219,6 +219,9 @@ public class Fields {
             private final Deque<Double> realSpeeds;
             private final Deque<Double> dcPwrs;
 
+            private double lastVoltage;
+            private double lastCurrent;
+
             public UsageByAverageAction() {
                 this.realSpeeds = new ArrayDeque<>(MAX_VALUES);
                 this.dcPwrs = new ArrayDeque<>(MAX_VALUES);
@@ -228,12 +231,18 @@ public class Fields {
             @Override
             public double updateValue(HashMap<String, Field> dependantFields, Field updatedField) {
                 switch (updatedField.getSID()) {
-                    case Sid.DcPowerOut:
-                        appendValue(dcPwrs, updatedField);
+                    case Sid.TractionBatteryVoltage:
+                        lastVoltage = updatedField.getValue();
+                        computePower();
+                        break;
+
+                    case Sid.TractionBatteryCurrent:
+                        lastCurrent = updatedField.getValue();
+                        computePower();
                         break;
 
                     case Sid.RealSpeed:
-                        appendValue(realSpeeds, updatedField);
+                        appendValue(realSpeeds, updatedField.getValue());
                         break;
                 }
 
@@ -253,16 +262,28 @@ public class Fields {
                 }
             }
 
+            private void computePower()
+            {
+                if (!Double.isNaN(lastCurrent) && !Double.isNaN(lastVoltage)) {
+                    appendValue(dcPwrs, lastCurrent * lastCurrent * -1000);
+                }
+                lastCurrent = Double.NaN;
+                lastVoltage= Double.NaN;
+            }
+
             private void emptyValues() {
                 this.realSpeeds.clear();
                 this.dcPwrs.clear();
+
+                lastVoltage = Double.NaN;
+                lastCurrent = Double.NaN;
             }
 
-            private void appendValue(Deque<Double> values, Field updatedField) {
+            private void appendValue(Deque<Double> values, double value) {
                 if (values.size() == MAX_VALUES) {
                     values.removeFirst();
                 }
-                values.addLast(updatedField.getValue());
+                values.addLast(value);
             }
 
             @Override
@@ -273,8 +294,9 @@ public class Fields {
 
         String unit = MainActivity.milesMode ? "mi/kWh" : "kWh/100km";
         int decimals = MainActivity.milesMode ? 2 : 1;
-        addVirtualFieldCommon("6500", decimals, unit, (short) 0, Arrays.asList(Sid.DcPowerOut, Sid.RealSpeed), true,
-                new UsageByAverageAction());
+        addVirtualFieldCommon("6500", decimals, unit, (short) 0,
+                Arrays.asList(Sid.TractionBatteryVoltage, Sid.TractionBatteryCurrent, Sid.RealSpeed),
+                true, new UsageByAverageAction());
     }
 
     private static double averageValues(Deque<Double> values) {
