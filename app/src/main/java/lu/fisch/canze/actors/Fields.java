@@ -35,6 +35,7 @@ import android.os.Bundle;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
+import java.time.Instant;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -44,6 +45,7 @@ import java.util.Deque;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.concurrent.TimeUnit;
 
 import lu.fisch.canze.R;
 import lu.fisch.canze.activities.MainActivity;
@@ -83,6 +85,7 @@ public class Fields {
 
     private LocationManager locationManager;
     private LocationListener locationListener;
+    private Thread testFieldsPropellerThread;
 
     //private int car = CAR_ANY;
 
@@ -117,6 +120,8 @@ public class Fields {
         addVirtualFieldUsageByIntegration();
         addVirtualFieldGps();
         addVirtualFieldAltitude();
+        addVirtualTestFieldClock();
+        addVirtualTestFields();
     }
 
     private void addVirtualField(String id) {
@@ -172,6 +177,12 @@ public class Fields {
             case "610f":
                 addVirtualFieldAltitude();
                 break;
+            case "6110":
+                addVirtualTestFieldClock();
+                break;
+            case "6111":
+                addVirtualTestFields();
+                break;
         }
     }
 
@@ -181,9 +192,63 @@ public class Fields {
             case "610f":
                 virtualFieldPropelGps(startStop);
                 break;
+
+            case "6110":
+            case "6111":
+                virtualTestFieldsPropel(startStop);
+                break;
         }
     }
 
+    private void addVirtualTestFieldClock() {
+        Field testClockField = getBySID(Sid.TestFieldClock);
+        if (testClockField == null) {
+            Frame frame = Frames.getInstance().getById(0x800);
+            testClockField = new Field("", frame, (short) 24, (short) 31, 1, 3, 0, "s", "6110", (short) 0x8ff, "TestClock", "");
+            add(testClockField);
+        }
+    }
+
+    private void addVirtualTestFields() {
+        addVirtualFieldCommon("6111", 1, "s", (short) 0x8ff, Collections.singletonList(Sid.TestFieldClock), false, (dependantFields, updatedField) -> {
+            final Field clockField = dependantFields.get(Sid.TestFieldClock);
+            if (clockField == null) {
+                return Double.NaN;
+            }
+            double time = clockField.getValue();
+            return 100.0 + 100.0 * Math.sin(2 * Math.PI * 0.1 * time);
+        });
+    }
+
+    private synchronized void virtualTestFieldsPropel(boolean startStop) {
+        // always try to interrupt the old thread
+        if (testFieldsPropellerThread != null) {
+            testFieldsPropellerThread.interrupt();
+            testFieldsPropellerThread = null;
+        }
+
+        if (startStop) {
+            Runnable propellerAction = () -> {
+                Instant start = Instant.now();
+                while (!Thread.currentThread().isInterrupted()) {
+                    try {
+                        Instant runTime = Instant.now();
+
+                        Field testField = getBySID(Sid.TestFieldClock);
+                        testField.setValue((runTime.toEpochMilli() - start.toEpochMilli()) / 1000.0);
+
+                        TimeUnit.MILLISECONDS.sleep(200);
+                    } catch (InterruptedException e) {
+                        Thread.currentThread().interrupt();
+                        break;
+                    }
+                }
+            };
+            testFieldsPropellerThread = new Thread(propellerAction, "test-field-propeller");
+            testFieldsPropellerThread.setDaemon(true);
+            testFieldsPropellerThread.start();
+        }
+    }
 
     private void addVirtualFieldUsage() {
         // It would be easier use SID_Consumption = "1fd.48" (dash kWh) instead of V*A
@@ -262,13 +327,12 @@ public class Fields {
                 }
             }
 
-            private void computePower()
-            {
+            private void computePower() {
                 if (!Double.isNaN(lastCurrent) && !Double.isNaN(lastVoltage)) {
                     appendValue(dcPwrs, lastCurrent * lastVoltage / -1000.0);
 
                     lastCurrent = Double.NaN;
-                    lastVoltage= Double.NaN;
+                    lastVoltage = Double.NaN;
                 }
             }
 
@@ -777,7 +841,7 @@ public class Fields {
         if (allOk) {
             Frame frame = Frames.getInstance().getById(0x800);
             if (frame == null) {
-                MainActivity.toast(MainActivity.TOAST_NONE, "rame does not exist:0x800");
+                MainActivity.toast(MainActivity.TOAST_NONE, "Frame does not exist:0x800");
                 MainActivity.debug("frame does not exist:0x800");
                 return;
             }
