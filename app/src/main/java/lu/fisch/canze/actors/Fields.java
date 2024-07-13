@@ -684,7 +684,7 @@ public class Fields {
 
         @Override
         public void onLocationChanged(Location loc) {
-            Field gpsField = getBySID("800.610e.24");
+            Field gpsField = getBySID(Sid.GPS);
             if (gpsField != null) {
                 gpsField.setValue(String.format(Locale.US, "%.6f/%.6f/%.1f", loc.getLatitude(), loc.getLongitude(), loc.getAltitude()));
                 if (MainActivity.fieldLogMode)
@@ -710,7 +710,7 @@ public class Fields {
             locationManager = (LocationManager) MainActivity.getInstance().getBaseContext().getSystemService(Context.LOCATION_SERVICE);
             locationListener = new MyLocationListener();
         }
-        Field gpsField = getBySID("800.610e.24");
+        Field gpsField = getBySID(Sid.GPS);
         if (gpsField == null) {
             Frame frame = Frames.getInstance().getById(0x800);
             gpsField = new Field("", frame, (short) 24, (short) 31, 1, 0, 0, "coord", "610e", (short) 0xaff, "GPS", "");
