@@ -22,14 +22,12 @@
 package lu.fisch.canze.activities;
 
 import android.Manifest;
-import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
 import android.content.BroadcastReceiver;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
@@ -43,15 +41,6 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
-
-import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatDelegate;
-import androidx.core.app.ActivityCompat;
-import androidx.core.content.ContextCompat;
-import androidx.viewpager.widget.ViewPager;
-import androidx.appcompat.app.ActionBar;
-import androidx.appcompat.app.AppCompatActivity;
-
 import android.text.Html;
 import android.util.Log;
 import android.view.Display;
@@ -67,9 +56,17 @@ import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
-//import com.google.firebase.crashlytics.FirebaseCrashlytics;
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.ActionBar;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.app.AppCompatDelegate;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
+import androidx.viewpager.widget.ViewPager;
+
 import java.io.File;
 import java.util.Locale;
+import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 
 import lu.fisch.canze.BuildConfig;
@@ -176,6 +173,11 @@ public class MainActivity extends AppCompatActivity implements FieldListener /*,
     public static boolean debugLogMode = false;
     public static boolean fieldLogMode = false;
 
+    public static boolean mqttEnabled = false;
+    public static String mqttConnectionUri = null;
+    public static String mqttConnectionUsername = null;
+    public static char[] mqttConnectionPassword = null;
+
     // use "debugLogMode" instead
     //public static boolean dataExportMode = false;
     public static DataLogger dataLogger = null; // rather use singleton in onCreate
@@ -241,9 +243,9 @@ public class MainActivity extends AppCompatActivity implements FieldListener /*,
                     // OR
                     // we use background mode
                     if (
-                            (new ForegroundCheckTask()).execute(context).get()==true
+                            (new ForegroundCheckTask()).execute(context).get() == true
                                     ||
-                                    bluetoothBackgroundMode==true
+                                    bluetoothBackgroundMode == true
                     ) {
                         // try to reconnect
                         (new Thread(new Runnable() {
@@ -361,6 +363,14 @@ public class MainActivity extends AppCompatActivity implements FieldListener /*,
             fieldLogMode = settings.getBoolean(SettingsActivity.SETTING_LOGGING_FIELDS_LOG, false);
             toastLevel = settings.getInt(SettingsActivity.SETTING_DISPLAY_TOAST_LEVEL, MainActivity.TOAST_ELM);
 
+            mqttEnabled = settings.getBoolean(SettingsActivity.MQTT_ENABLED, false);
+            mqttConnectionUri = settings.getString(SettingsActivity.MQTT_BROKER_CONNECTION_URI, null);
+            mqttConnectionUsername = settings.getString(SettingsActivity.MQTT_BROKER_USERNAME, null);
+            mqttConnectionPassword = Optional.ofNullable(settings.getString(SettingsActivity.MQTT_BROKER_PASSWORD, null))
+                    .map(String::trim)
+                    .filter(s -> !s.isEmpty())
+                    .map(String::toCharArray)
+                    .orElse(null);
 
             if (bluetoothDeviceName != null && !bluetoothDeviceName.isEmpty() && bluetoothDeviceName.length() > 4)
                 BluetoothManager.getInstance().setDummyMode(bluetoothDeviceName.substring(0, 4).compareTo("HTTP") == 0);
@@ -477,8 +487,7 @@ public class MainActivity extends AppCompatActivity implements FieldListener /*,
 
     private static final int MY_PERMISSIONS_REQUEST = 123;
 
-    private void configureBluetoothManager()
-    {
+    private void configureBluetoothManager() {
         // configure Bluetooth manager
         BluetoothManager.getInstance().setBluetoothEvent(new BluetoothEvent() {
             @Override
@@ -550,11 +559,10 @@ public class MainActivity extends AppCompatActivity implements FieldListener /*,
                 new String[]{permissionName}, permissionRequestCode);
     }
 
-    public void checkPermissions()
-    {
+    public void checkPermissions() {
         int permissionCheck;
 
-        if(Build.VERSION.SDK_INT>30) {
+        if (Build.VERSION.SDK_INT > 30) {
             permissionCheck = ContextCompat.checkSelfPermission(
                     this, Manifest.permission.BLUETOOTH_CONNECT);
             if (permissionCheck != PackageManager.PERMISSION_GRANTED) {
@@ -566,9 +574,7 @@ public class MainActivity extends AppCompatActivity implements FieldListener /*,
             if (permissionCheck != PackageManager.PERMISSION_GRANTED) {
                 requestPermission(Manifest.permission.BLUETOOTH_SCAN, 101);
             }
-        }
-        else
-        {
+        } else {
             permissionCheck = ContextCompat.checkSelfPermission(
                     this, Manifest.permission.WRITE_EXTERNAL_STORAGE);
             if (permissionCheck != PackageManager.PERMISSION_GRANTED) {
@@ -582,13 +588,12 @@ public class MainActivity extends AppCompatActivity implements FieldListener /*,
         super.onStart();
         checkPermissions();
 
-        if((ContextCompat.checkSelfPermission(this, Manifest.permission.BLUETOOTH_CONNECT) == PackageManager.PERMISSION_GRANTED &&
-                Build.VERSION.SDK_INT>30)
+        if ((ContextCompat.checkSelfPermission(this, Manifest.permission.BLUETOOTH_CONNECT) == PackageManager.PERMISSION_GRANTED &&
+                Build.VERSION.SDK_INT > 30)
                 ||
                 (ContextCompat.checkSelfPermission(this, Manifest.permission.BLUETOOTH) == PackageManager.PERMISSION_GRANTED &&
-                        Build.VERSION.SDK_INT<=30)
-        )
-        {
+                        Build.VERSION.SDK_INT <= 30)
+        ) {
             configureBluetoothManager();
         }
     }
@@ -683,7 +688,6 @@ public class MainActivity extends AppCompatActivity implements FieldListener /*,
         this.registerReceiver(broadcastReceiver, intentFilter);
 
 
-
         // load settings
         // - includes the reader
         // - includes the decoder
@@ -707,8 +711,7 @@ public class MainActivity extends AppCompatActivity implements FieldListener /*,
         })).start();
     }
 
-    void handleDarkMode()
-    {
+    void handleDarkMode() {
         // dark mode handling
 
         // this is a silly extra check against surious NPEs
@@ -729,9 +732,9 @@ public class MainActivity extends AppCompatActivity implements FieldListener /*,
             darkModeSetting = set.getBoolean(SettingsActivity.SETTING_DISPLAY_THEME, false) ? AppCompatDelegate.MODE_NIGHT_YES : AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM;
         }
 
-        if(AppCompatDelegate.getDefaultNightMode() != darkModeSetting) { // 2
-            AppCompatDelegate.setDefaultNightMode (darkModeSetting);
-            if(Build.VERSION.SDK_INT < 28) {
+        if (AppCompatDelegate.getDefaultNightMode() != darkModeSetting) { // 2
+            AppCompatDelegate.setDefaultNightMode(darkModeSetting);
+            if (Build.VERSION.SDK_INT < 28) {
                 finish();
                 startActivity(new Intent(MainActivity.this, MainActivity.this.getClass()));
             }
@@ -743,7 +746,7 @@ public class MainActivity extends AppCompatActivity implements FieldListener /*,
     @Override
     public void onResume() {
         debug("MainActivity: onResume");
-        setBluetoothMenuItem (mOptionsMenu);
+        setBluetoothMenuItem(mOptionsMenu);
 
         instance = this; // If I am not mistaken, instance should only ever be populated in onCreate
 
@@ -777,62 +780,62 @@ public class MainActivity extends AppCompatActivity implements FieldListener /*,
             (new Thread(this::reloadBluetooth)).start();
         }
 
-        if(!displayDone)
-        if (!this.settings.getBoolean(SettingsActivity.SETTING_APP_DISCLAIMER_SEEN, false)) {
-            AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(this);
-            displayDone=true;
+        if (!displayDone)
+            if (!this.settings.getBoolean(SettingsActivity.SETTING_APP_DISCLAIMER_SEEN, false)) {
+                AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(this);
+                displayDone = true;
 
-            // set title
-            alertDialogBuilder.setTitle(R.string.prompt_Disclaimer);
+                // set title
+                alertDialogBuilder.setTitle(R.string.prompt_Disclaimer);
 
-            // set dialog message
-            String yes = getStringSingle(R.string.prompt_Accept);
-            String no = getStringSingle(R.string.prompt_Decline);
+                // set dialog message
+                String yes = getStringSingle(R.string.prompt_Accept);
+                String no = getStringSingle(R.string.prompt_Decline);
 
-            Display display = getWindowManager().getDefaultDisplay();
-            Point size = new Point();
-            display.getSize(size);
-            float width = size.x;
-            float height = size.y;
-            // int height = size.y;
-            width = width / getResources().getDisplayMetrics().scaledDensity;
-            height = height / getResources().getDisplayMetrics().scaledDensity;
-            if (width <= 480 || height <= 480) {
-                yes = getStringSingle(R.string.default_Yes);
-                no = getStringSingle(R.string.default_No);
+                Display display = getWindowManager().getDefaultDisplay();
+                Point size = new Point();
+                display.getSize(size);
+                float width = size.x;
+                float height = size.y;
+                // int height = size.y;
+                width = width / getResources().getDisplayMetrics().scaledDensity;
+                height = height / getResources().getDisplayMetrics().scaledDensity;
+                if (width <= 480 || height <= 480) {
+                    yes = getStringSingle(R.string.default_Yes);
+                    no = getStringSingle(R.string.default_No);
+                }
+
+                alertDialogBuilder
+                        .setMessage(Html.fromHtml(getStringSingle(R.string.prompt_DisclaimerText)))
+                        .setCancelable(true)
+                        .setPositiveButton(yes, (dialog, id) -> {
+                            // if this button is clicked, close
+                            SharedPreferences.Editor editor = settings.edit();
+                            editor.putBoolean(SettingsActivity.SETTING_APP_DISCLAIMER_SEEN, true);
+                            // editor.commit();
+                            editor.apply();
+                            // current activity
+                            dialog.cancel();
+                        })
+                        .setNegativeButton(no,
+                                (dialog, id) -> {
+                                    // if this button is clicked, just close
+                                    // the dialog box and do nothing
+                                    dialog.cancel();
+                                    //MainActivity.this.finishAffinity(); requires API16
+                                    MainActivity.this.finish();
+                                    android.os.Process.killProcess(android.os.Process.myPid());
+                                    System.exit(0);
+                                });
+
+                // create alert dialog
+                AlertDialog alertDialog = alertDialogBuilder.create();
+
+                // show it
+                alertDialog.show();
+                //alertDialog.getButton(AlertDialog.BUTTON_POSITIVE).setTextSize(TypedValue.COMPLEX_UNIT_SP, 25.0f);
+                //alertDialog.getButton(AlertDialog.BUTTON_NEGATIVE).setTextSize(TypedValue.COMPLEX_UNIT_SP, 25.0f);
             }
-
-            alertDialogBuilder
-                    .setMessage(Html.fromHtml(getStringSingle(R.string.prompt_DisclaimerText)))
-                    .setCancelable(true)
-                    .setPositiveButton(yes, (dialog, id) -> {
-                        // if this button is clicked, close
-                        SharedPreferences.Editor editor = settings.edit();
-                        editor.putBoolean(SettingsActivity.SETTING_APP_DISCLAIMER_SEEN, true);
-                        // editor.commit();
-                        editor.apply();
-                        // current activity
-                        dialog.cancel();
-                    })
-                    .setNegativeButton(no,
-                            (dialog, id) -> {
-                                // if this button is clicked, just close
-                                // the dialog box and do nothing
-                                dialog.cancel();
-                                //MainActivity.this.finishAffinity(); requires API16
-                                MainActivity.this.finish();
-                                android.os.Process.killProcess(android.os.Process.myPid());
-                                System.exit(0);
-                            });
-
-            // create alert dialog
-            AlertDialog alertDialog = alertDialogBuilder.create();
-
-            // show it
-            alertDialog.show();
-            //alertDialog.getButton(AlertDialog.BUTTON_POSITIVE).setTextSize(TypedValue.COMPLEX_UNIT_SP, 25.0f);
-            //alertDialog.getButton(AlertDialog.BUTTON_NEGATIVE).setTextSize(TypedValue.COMPLEX_UNIT_SP, 25.0f);
-        }
 
         // do we need to start another default activity (but leave main in the stack)?
         // first, we select the proper fragment. Note that this is a precursor to running another
@@ -992,7 +995,7 @@ public class MainActivity extends AppCompatActivity implements FieldListener /*,
         if (BuildConfig.DEBUG) setForceCrash(menu);
 
         // get a reference to the bluetooth action button
-        setBluetoothMenuItem (menu); //bluetoothMenutItem = menu.findItem(R.id.action_bluetooth);
+        setBluetoothMenuItem(menu); //bluetoothMenutItem = menu.findItem(R.id.action_bluetooth);
         // and put the right view on it
         // bluetoothMenutItem.setActionView(R.layout.animated_menu_item);
 
@@ -1020,14 +1023,14 @@ public class MainActivity extends AppCompatActivity implements FieldListener /*,
         return true;
     }
 
-    private void setForceCrash (Menu menu) {
+    private void setForceCrash(Menu menu) {
         if (menu == null) return;
         MenuItem crasher = menu.findItem(R.id.action_crash);
         crasher.setVisible(true);
     }
 
 
-    public void setBluetoothMenuItem (Menu menu) {
+    public void setBluetoothMenuItem(Menu menu) {
         if (menu == null) return;
         bluetoothMenutItem = menu.findItem(R.id.action_bluetooth);
         showBluetoothState(mBtState);
@@ -1113,16 +1116,14 @@ public class MainActivity extends AppCompatActivity implements FieldListener /*,
 
                     // load the activity
                     checkPermissions();
-                    if((ContextCompat.checkSelfPermission(this, Manifest.permission.BLUETOOTH_CONNECT) != PackageManager.PERMISSION_GRANTED &&
-                            Build.VERSION.SDK_INT>30)
+                    if ((ContextCompat.checkSelfPermission(this, Manifest.permission.BLUETOOTH_CONNECT) != PackageManager.PERMISSION_GRANTED &&
+                            Build.VERSION.SDK_INT > 30)
                             ||
-                       (ContextCompat.checkSelfPermission(this, Manifest.permission.BLUETOOTH) != PackageManager.PERMISSION_GRANTED &&
-                                    Build.VERSION.SDK_INT<=30)
-                    )
-                    {
+                            (ContextCompat.checkSelfPermission(this, Manifest.permission.BLUETOOTH) != PackageManager.PERMISSION_GRANTED &&
+                                    Build.VERSION.SDK_INT <= 30)
+                    ) {
                         toast("Can't open settings without having the permission to use bluetooth. Sorry!");
-                    }
-                    else {
+                    } else {
                         Intent intent = new Intent(MainActivity.this, SettingsActivity.class);
                         startActivityForResult(intent, SETTINGS_ACTIVITY);
                     }
@@ -1190,11 +1191,11 @@ public class MainActivity extends AppCompatActivity implements FieldListener /*,
         return (car == CAR_X10PH2);
     }
 
-    public static boolean isTwingo()  {
+    public static boolean isTwingo() {
         return (car == CAR_TWINGO);
     }
 
-    public static boolean isTwizy()  {
+    public static boolean isTwizy() {
         return (car == CAR_TWIZY);
     }
 
@@ -1315,12 +1316,13 @@ public class MainActivity extends AppCompatActivity implements FieldListener /*,
         return screenOrientation == Configuration.ORIENTATION_PORTRAIT;
     }
 
-    public void setLocalTheme (Resources.Theme localTheme) {
+    public void setLocalTheme(Resources.Theme localTheme) {
         this.localTheme = localTheme;
     }
 
-    public Resources.Theme getLocalTheme () {
-        if (this.localTheme == null) return this.getTheme(); // we can't do better than this. So still default to something in the Color.decode
+    public Resources.Theme getLocalTheme() {
+        if (this.localTheme == null)
+            return this.getTheme(); // we can't do better than this. So still default to something in the Color.decode
         return this.localTheme;
     }
 
@@ -1347,7 +1349,7 @@ public class MainActivity extends AppCompatActivity implements FieldListener /*,
         File path = Environment.getExternalStoragePublicDirectory("CanZE");
         //debug("Datalogger: "+Environment.DIRECTORY_DCIM);
         path.mkdirs();
-        return path.getAbsolutePath()+ "/";
+        return path.getAbsolutePath() + "/";
 
         //return getExternalFilesDir(null).getAbsolutePath() + "/";
     }
