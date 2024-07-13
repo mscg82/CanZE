@@ -76,6 +76,9 @@
             android:name=".activities.DrivingAdvancedActivity"
             android:label="@string/title_activity_driving_advanced" />
         <activity
+            android:name=".activities.MQTTPublisherActivity"
+            android:label="@string/title_mqtt" />
+        <activity
             android:name=".activities.BrakingActivity"
             android:label="@string/title_activity_braking" />
         <activity

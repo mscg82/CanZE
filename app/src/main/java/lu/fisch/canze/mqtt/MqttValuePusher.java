@@ -58,10 +58,18 @@ public class MqttValuePusher implements AutoCloseable {
     }
 
     public void pushValue(String sid, double value) {
+        if (Double.isNaN(value)) {
+            return;
+        }
+
         pushValue(sid, String.format(Locale.ENGLISH, "%.3f", value));
     }
 
     public void pushValue(String sid, String value) {
+        if (value == null || value.trim().isEmpty()) {
+            return;
+        }
+
         this.asyncExecutor.submit(() -> {
             try {
                 IMqttClient mqttClient = this.mqttClient.get();

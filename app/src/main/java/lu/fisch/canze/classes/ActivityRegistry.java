@@ -1,11 +1,10 @@
 package lu.fisch.canze.classes;
 
+import static java.util.Comparator.comparing;
+
 import android.content.SharedPreferences;
 
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
 
 import lu.fisch.canze.R;
 import lu.fisch.canze.activities.AllDataActivity;
@@ -28,6 +27,7 @@ import lu.fisch.canze.activities.FirmwareActivity;
 import lu.fisch.canze.activities.HeatmapBatcompActivity;
 import lu.fisch.canze.activities.HeatmapCellvoltageActivity;
 import lu.fisch.canze.activities.LeakCurrentsActivity;
+import lu.fisch.canze.activities.MQTTPublisherActivity;
 import lu.fisch.canze.activities.MainActivity;
 import lu.fisch.canze.activities.PredictionActivity;
 import lu.fisch.canze.activities.RangeActivity;
@@ -68,6 +68,7 @@ public class ActivityRegistry {
     public static final int ACTIVITY_RESEARCH = 22;
     public static final int ACTIVITY_FIELD_TEST = 23;
     public static final int ACTIVITY_DRIVING_ADVANCED = 24;
+    public static final int ACTIVITY_MQTT_PUBLISHER = 25;
 
     public static final int[] ACTIVITIES_MAIN = {
             ACTIVITY_CONSUMPTION,
@@ -151,7 +152,6 @@ public class ActivityRegistry {
         activities.add(new Activity(ACTIVITY_CHARGING, R.string.button_Charging, R.drawable.button_charge, ChargingActivity.class));
         activities.add(new Activity(ACTIVITY_BATTERY, R.string.button_Battery, R.drawable.button_battery, BatteryActivity.class));
         activities.add(new Activity(ACTIVITY_DRIVING, R.string.button_Driving, R.drawable.button_drive, DrivingActivity.class));
-        activities.add(new Activity(ACTIVITY_DRIVING_ADVANCED, R.string.button_Driving_advanced, R.drawable.button_drive, DrivingAdvancedActivity.class));
         activities.add(new Activity(ACTIVITY_CLIMATE, R.string.button_Climate, R.drawable.button_climate, ClimaTechActivity.class));
         activities.add(new Activity(ACTIVITY_BRAKING, R.string.button_Braking, R.drawable.button_brake, BrakingActivity.class));
         activities.add(new Activity(ACTIVITY_AVERAGE_SPEED, R.string.button_speedcontrol, R.drawable.button_speedcam, SpeedcontrolActivity.class));
@@ -175,13 +175,12 @@ public class ActivityRegistry {
         activities.add(new Activity(ACTIVITY_RESEARCH, R.string.button_Research, R.drawable.button_microscope, ResearchActivity.class));
         activities.add(new Activity(ACTIVITY_FIELD_TEST, R.string.button_FieldTest, R.drawable.button_test, FieldTestActivity.class));
 
+        // others
+        activities.add(new Activity(ACTIVITY_DRIVING_ADVANCED, R.string.button_Driving_advanced, R.drawable.button_drive, DrivingAdvancedActivity.class));
+        activities.add(new Activity(ACTIVITY_MQTT_PUBLISHER, R.string.button_mqtt, R.drawable.button_range, MQTTPublisherActivity.class));
+
         // sort by title
-        Collections.sort(activities, new Comparator<Activity>() {
-            @Override
-            public int compare(Activity o1, Activity o2) {
-                return o1.getTitle().compareTo(o2.getTitle());
-            }
-        });
+        activities.sort(comparing(Activity::getTitle));
 
         loadSelection();
     }
