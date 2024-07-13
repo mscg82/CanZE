@@ -36,18 +36,6 @@ import android.text.Html;
 import android.view.Display;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.widget.TextView;
-
-import com.google.gson.Gson;
-
-import java.lang.reflect.Method;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Set;
 
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
@@ -58,6 +46,16 @@ import androidx.preference.Preference;
 import androidx.preference.PreferenceFragmentCompat;
 import androidx.preference.PreferenceManager;
 import androidx.preference.SwitchPreference;
+
+import java.lang.reflect.Method;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Set;
+
 import lu.fisch.canze.BuildConfig;
 import lu.fisch.canze.R;
 import lu.fisch.canze.actors.Utils;
@@ -114,6 +112,12 @@ public class SettingsActivity extends AppCompatActivity {
     // Bluetooth devices names used to compare settings values
     public static final String DEVICE_NAME_HTTP_GATEWAY = "http gateway";
     public static final String DEVICE_NAME_CAN_SEE = "cansee";
+
+    // MQTT connector
+    public static final String MQTT_ENABLED = "mqttEnabled";
+    public static final String MQTT_BROKER_CONNECTION_URI = "mqttConnectionUri";
+    public static final String MQTT_BROKER_USERNAME = "mqttUsername";
+    public static final String MQTT_BROKER_PASSWORD = "mqttPassword";
 
     // Car models
     public static final CharSequence[] CAR_MODELS_LABELS = {

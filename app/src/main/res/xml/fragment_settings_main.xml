@@ -117,6 +117,33 @@
     </PreferenceCategory>
 
     <PreferenceCategory
+        app:title="@string/label_MQTT"
+        app:iconSpaceReserved="false">
+        <SwitchPreference
+            app:iconSpaceReserved="false"
+            app:key="mqttEnabled"
+            app:summary="@string/label_MQTT_Enabled_Desc"
+            app:title="@string/label_MQTT_Enabled" />
+        <EditTextPreference
+            app:iconSpaceReserved="false"
+            app:key="mqttConnectionUri"
+            app:title="@string/label_MQTT_uri"
+            app:useSimpleSummaryProvider="true" />
+        <EditTextPreference
+            app:iconSpaceReserved="false"
+            app:key="mqttUsername"
+            app:title="@string/label_MQTT_username"
+            app:useSimpleSummaryProvider="true" />
+        <EditTextPreference
+            app:iconSpaceReserved="false"
+            app:key="mqttPassword"
+            app:title="@string/label_MQTT_password"
+            app:useSimpleSummaryProvider="true"
+            android:inputType="textPassword" />
+
+    </PreferenceCategory>
+
+    <PreferenceCategory
         app:title="@string/label_Actions"
         app:iconSpaceReserved="false">
         <Preference

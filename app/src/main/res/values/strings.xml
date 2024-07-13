@@ -828,6 +828,12 @@
     <string name="label_ToastLevelElm">Device</string>
     <string name="label_ToastLevelElmCar">All</string>
     <string name="label_Info">Info</string>
+    <string name="label_MQTT">MQTT</string>
+    <string name="label_MQTT_Enabled">Enabled</string>
+    <string name="label_MQTT_Enabled_Desc">This will enable the MQTT connector</string>
+    <string name="label_MQTT_uri">MQTT broker connection URI</string>
+    <string name="label_MQTT_username">MQTT broker username</string>
+    <string name="label_MQTT_password">MQTT broker password</string>
 
     <!-- SettingsCustom -->
 
