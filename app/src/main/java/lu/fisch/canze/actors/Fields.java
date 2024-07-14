@@ -35,6 +35,7 @@ import android.os.Bundle;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
+import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
@@ -216,7 +217,9 @@ public class Fields {
                 return Double.NaN;
             }
             double time = clockField.getValue();
-            return 100.0 + 100.0 * Math.sin(2 * Math.PI * 0.1 * time);
+            double period = Duration.ofMinutes(5).toMillis() / 1000.0; // ten minutes in seconds
+            double angularSpeed = (2 * Math.PI) / period;
+            return 100.0 + 100.0 * Math.sin(angularSpeed * time);
         });
     }
 
