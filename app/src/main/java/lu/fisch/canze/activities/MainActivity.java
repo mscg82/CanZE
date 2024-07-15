@@ -174,6 +174,7 @@ public class MainActivity extends AppCompatActivity implements FieldListener /*,
     public static boolean fieldLogMode = false;
 
     public static boolean mqttEnabled = false;
+    public static boolean mqttTestEnabled = false;
     public static String mqttConnectionUri = null;
     public static String mqttConnectionUsername = null;
     public static char[] mqttConnectionPassword = null;
@@ -364,6 +365,7 @@ public class MainActivity extends AppCompatActivity implements FieldListener /*,
             toastLevel = settings.getInt(SettingsActivity.SETTING_DISPLAY_TOAST_LEVEL, MainActivity.TOAST_ELM);
 
             mqttEnabled = settings.getBoolean(SettingsActivity.MQTT_ENABLED, false);
+            mqttTestEnabled = settings.getBoolean(SettingsActivity.MQTT_TEST_ENABLED, false);
             mqttConnectionUri = settings.getString(SettingsActivity.MQTT_BROKER_CONNECTION_URI, null);
             mqttConnectionUsername = settings.getString(SettingsActivity.MQTT_BROKER_USERNAME, null);
             mqttConnectionPassword = Optional.ofNullable(settings.getString(SettingsActivity.MQTT_BROKER_PASSWORD, null))

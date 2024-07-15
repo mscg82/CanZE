@@ -124,6 +124,11 @@
             app:key="mqttEnabled"
             app:summary="@string/label_MQTT_Enabled_Desc"
             app:title="@string/label_MQTT_Enabled" />
+        <SwitchPreference
+            app:iconSpaceReserved="false"
+            app:key="mqttTestEnabled"
+            app:summary="@string/label_MQTT_Test_Enabled_Desc"
+            app:title="@string/label_MQTT_Test_Enabled" />
         <EditTextPreference
             app:iconSpaceReserved="false"
             app:key="mqttConnectionUri"

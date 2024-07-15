@@ -115,6 +115,7 @@ public class SettingsActivity extends AppCompatActivity {
 
     // MQTT connector
     public static final String MQTT_ENABLED = "mqttEnabled";
+    public static final String MQTT_TEST_ENABLED = "mqttTestEnabled";
     public static final String MQTT_BROKER_CONNECTION_URI = "mqttConnectionUri";
     public static final String MQTT_BROKER_USERNAME = "mqttUsername";
     public static final String MQTT_BROKER_PASSWORD = "mqttPassword";
