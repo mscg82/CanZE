@@ -8,7 +8,6 @@ import org.eclipse.paho.client.mqttv3.IMqttClient;
 import org.eclipse.paho.client.mqttv3.MqttClient;
 import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
 import org.eclipse.paho.client.mqttv3.MqttMessage;
-import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Locale;
@@ -35,7 +34,7 @@ public class MqttValuePusher implements AutoCloseable {
         if (MainActivity.mqttEnabled) {
             this.asyncExecutor.submit(() -> {
                 try {
-                    IMqttClient mqttClient1 = new MqttClient(url, publisherId, new MemoryPersistence());
+                    IMqttClient internalMqttClient = new MqttClient(url, publisherId, new InMemoryPersistence());
 
                     MqttConnectOptions options = new MqttConnectOptions();
                     if (username != null && !username.trim().isEmpty()) {
@@ -47,9 +46,9 @@ public class MqttValuePusher implements AutoCloseable {
                     options.setAutomaticReconnect(true);
                     options.setCleanSession(true);
                     options.setConnectionTimeout(10);
-                    mqttClient1.connect(options);
+                    internalMqttClient.connect(options);
 
-                    closeClient(this.mqttClient.getAndSet(mqttClient1));
+                    closeClient(this.mqttClient.getAndSet(internalMqttClient));
                 } catch (Exception e) {
                     Log.e(MainActivity.TAG, "Failed to connect to MQTT broker", e);
                 }
