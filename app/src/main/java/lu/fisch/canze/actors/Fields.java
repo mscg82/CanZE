@@ -235,7 +235,7 @@ public class Fields {
                 return Double.NaN;
             }
             double energy = energyField.getValue();
-            return (energy / 52.5) * 100.0;
+            return Math.min(energy * 2.0, 100.0);
         });
     }
 
