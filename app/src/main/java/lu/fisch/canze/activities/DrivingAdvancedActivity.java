@@ -73,6 +73,7 @@ public class DrivingAdvancedActivity extends CanzeActivity implements FieldListe
         super.onPause();
         if (mqttPusher != null) {
             mqttPusher.close();
+            mqttPusher = null;
         }
     }
 
@@ -81,11 +82,15 @@ public class DrivingAdvancedActivity extends CanzeActivity implements FieldListe
         super.onDestroy();
         if (mqttPusher != null) {
             mqttPusher.close();
+            mqttPusher = null;
         }
     }
 
     protected void initListeners() {
         MainActivity.getInstance().setDebugListener(this);
+
+        mqttPusher.connect();
+
         addField(Sid.EngineFanSpeed, 0);
         addField(Sid.HvCoolingState, 0);
         addField(Sid.HvEvaporationTemp, 10000);
@@ -158,10 +163,10 @@ public class DrivingAdvancedActivity extends CanzeActivity implements FieldListe
 
                 case Sid.UserSoC:
                     setNumericalValueFromFields(findViewById(R.id.text_SOC),
-                            MainActivity.fields.getBySID(Sid.RealSoC), field);
+                            MainActivity.fields.getBySID(Sid.DisplaySOC), field);
                     break;
 
-                case Sid.RealSoC:
+                case Sid.DisplaySOC:
                     setNumericalValueFromFields(findViewById(R.id.text_SOC),
                             field, MainActivity.fields.getBySID(Sid.UserSoC));
                     break;

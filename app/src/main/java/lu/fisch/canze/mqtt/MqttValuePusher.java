@@ -21,6 +21,7 @@ public class MqttValuePusher implements AutoCloseable {
 
     private final AtomicReference<IMqttClient> mqttClient;
     private final ExecutorService asyncExecutor;
+    private final Runnable connectionAction;
 
     public MqttValuePusher(String publisherId) {
         this(publisherId, MainActivity.mqttConnectionUri, MainActivity.mqttConnectionUsername, MainActivity.mqttConnectionPassword);
@@ -30,27 +31,41 @@ public class MqttValuePusher implements AutoCloseable {
         this.mqttClient = new AtomicReference<>(null);
         NumberedThreadFactory threadFactory = new NumberedThreadFactory("mqtt-pool-");
         this.asyncExecutor = Executors.newSingleThreadExecutor(threadFactory);
+        this.connectionAction = () -> {
+            try {
+                IMqttClient internalMqttClient = new MqttClient(url, publisherId, new InMemoryPersistence());
 
+                MqttConnectOptions options = new MqttConnectOptions();
+                if (username != null && !username.trim().isEmpty()) {
+                    options.setUserName(username);
+                }
+                if (password != null) {
+                    options.setPassword(password);
+                }
+                options.setAutomaticReconnect(true);
+                options.setCleanSession(true);
+                options.setConnectionTimeout(10);
+                internalMqttClient.connect(options);
+
+                closeClient(this.mqttClient.getAndSet(internalMqttClient));
+            } catch (Exception e) {
+                Log.e(MainActivity.TAG, "Failed to connect to MQTT broker", e);
+            }
+        };
+
+
+    }
+
+    public void connect() {
+        connectAndThen(null);
+    }
+
+    public void connectAndThen(Runnable additionalAction) {
         if (MainActivity.mqttEnabled) {
             this.asyncExecutor.submit(() -> {
-                try {
-                    IMqttClient internalMqttClient = new MqttClient(url, publisherId, new InMemoryPersistence());
-
-                    MqttConnectOptions options = new MqttConnectOptions();
-                    if (username != null && !username.trim().isEmpty()) {
-                        options.setUserName(username);
-                    }
-                    if (password != null) {
-                        options.setPassword(password);
-                    }
-                    options.setAutomaticReconnect(true);
-                    options.setCleanSession(true);
-                    options.setConnectionTimeout(10);
-                    internalMqttClient.connect(options);
-
-                    closeClient(this.mqttClient.getAndSet(internalMqttClient));
-                } catch (Exception e) {
-                    Log.e(MainActivity.TAG, "Failed to connect to MQTT broker", e);
+                this.connectionAction.run();
+                if (additionalAction != null) {
+                    additionalAction.run();
                 }
             });
         }

@@ -62,6 +62,7 @@ public class MQTTPublisherActivity extends CanzeActivity implements FieldListene
         super.onPause();
         if (mqttPusher != null) {
             mqttPusher.close();
+            mqttPusher = null;
         }
     }
 
@@ -70,7 +71,13 @@ public class MQTTPublisherActivity extends CanzeActivity implements FieldListene
         super.onDestroy();
         if (mqttPusher != null) {
             mqttPusher.close();
+            mqttPusher = null;
         }
+    }
+
+    @Override
+    protected void initListenerAndPropelFields() {
+        mqttPusher.connectAndThen(() -> runOnUiThread(super::initListenerAndPropelFields));
     }
 
     protected void initListeners() {
@@ -92,6 +99,9 @@ public class MQTTPublisherActivity extends CanzeActivity implements FieldListene
         addField(Sid.DisplaySOC, 10000);
         addField(Sid.GroundResistance, 0);
         addField(Sid.AvailableEnergy, 5000);
+        if (MainActivity.mqttTestEnabled) {
+            addField(Sid.TestField1, 0);
+        }
     }
 
 
@@ -165,6 +175,10 @@ public class MQTTPublisherActivity extends CanzeActivity implements FieldListene
 
                 case Sid.AvailableEnergy:
                     setNumericValueFromField(findViewById(R.id.text_energy), "%.2f", field);
+                    mqttPusher.pushValue(field.getSID(), field.getValue());
+                    break;
+
+                case Sid.TestField1:
                     mqttPusher.pushValue(field.getSID(), field.getValue());
                     break;
             }

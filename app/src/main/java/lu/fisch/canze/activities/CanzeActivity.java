@@ -21,19 +21,18 @@
 
 package lu.fisch.canze.activities;
 
-import android.os.Build;
+import static lu.fisch.canze.devices.Device.INTERVAL_ASAP;
+
 import android.os.Bundle;
-
-import androidx.annotation.NonNull;
-import androidx.appcompat.app.ActionBar;
-import androidx.appcompat.app.AppCompatActivity;
-
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.WindowManager;
 import android.widget.TextView;
+
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.ActionBar;
+import androidx.appcompat.app.AppCompatActivity;
 
 import java.security.InvalidParameterException;
 import java.util.ArrayList;
@@ -45,8 +44,6 @@ import lu.fisch.canze.actors.Fields;
 import lu.fisch.canze.bluetooth.BluetoothManager;
 import lu.fisch.canze.interfaces.FieldListener;
 import lu.fisch.canze.widgets.WidgetView;
-
-import static lu.fisch.canze.devices.Device.INTERVAL_ASAP;
 
 /**
  * Created by robertfisch on 30.09.2015.
@@ -153,13 +150,7 @@ public abstract class CanzeActivity extends AppCompatActivity implements FieldLi
         // save the local theme do it can be used decoding colors for the graphs
         MainActivity.getInstance().setLocalTheme(this.getTheme());
 
-        // when initlisteners is called, the activity adds the fields to the device queue
-        // moved up because sef propelled fields need to already be added to subscribedFields
-        // note that onResume (re)adds the fields, while onPause does not clear them out
-        // this is done by onDestroy->removeFieldListeners
-        initListeners();
-        // start the self propelled fields (i.e. GPS)
-        selfPropelFields(true);
+        initListenerAndPropelFields();
 
         // if we paused ourselvers
         if (iLeftMyOwn && !widgetClicked) {
@@ -378,6 +369,17 @@ public abstract class CanzeActivity extends AppCompatActivity implements FieldLi
     @Override
     public void onFieldUpdateEvent(Field field) {
         // empty --> descents should override this
+    }
+
+    protected void initListenerAndPropelFields() {
+        // when initlisteners is called, the activity adds the fields to the device queue
+        // moved up because sef propelled fields need to already be added to subscribedFields
+        // note that onResume (re)adds the fields, while onPause does not clear them out
+        // this is done by onDestroy->removeFieldListeners
+        initListeners();
+
+        // start the self propelled fields (i.e. GPS)
+        selfPropelFields(true);
     }
 
     protected abstract void initListeners();
