@@ -134,6 +134,7 @@ public class Sid {
     public static final String TestField1                           = "800.6111.24";
     public static final String InstantConsumptionByAverage          = "800.6500.24";
     public static final String InstantConsumptionByIntegration      = "800.6501.24";
+    public static final String DisplaySOC                           = "800.6600.24";
 
 
     public static final String CCSEVSEMaxPower                      = "18daf1da.623006.24";

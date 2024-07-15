@@ -1,5 +1,4 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:custom="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -136,10 +135,24 @@
             <TextView
                 android:layout_weight="0.7"
                 android:width="0dp"
-                android:text="@string/label_StateOfCharge" />
+                android:text="@string/label_UserSOC" />
 
             <TextView
                 android:id="@+id/text_soc"
+                android:layout_weight="0.3"
+                android:width="0dp"
+                android:gravity="end"
+                android:text="@string/default_Dash" />
+        </TableRow>
+
+        <TableRow>
+            <TextView
+                android:layout_weight="0.7"
+                android:width="0dp"
+                android:text="@string/label_RealSOC" />
+
+            <TextView
+                android:id="@+id/text_disp_soc"
                 android:layout_weight="0.3"
                 android:width="0dp"
                 android:gravity="end"

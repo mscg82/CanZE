@@ -123,6 +123,7 @@ public class Fields {
         addVirtualFieldAltitude();
         addVirtualTestFieldClock();
         addVirtualTestFields();
+        addVirtualFieldSOC();
     }
 
     private void addVirtualField(String id) {
@@ -184,6 +185,9 @@ public class Fields {
             case "6111":
                 addVirtualTestFields();
                 break;
+            case "6600":
+                addVirtualFieldSOC();
+                break;
         }
     }
 
@@ -220,6 +224,18 @@ public class Fields {
             double period = Duration.ofMinutes(5).toMillis() / 1000.0; // ten minutes in seconds
             double angularSpeed = (2 * Math.PI) / period;
             return 100.0 + 100.0 * Math.sin(angularSpeed * time);
+        });
+    }
+
+    private void addVirtualFieldSOC()
+    {
+        addVirtualFieldCommon("6600", 1, "%", (short) 0x8ff, Collections.singletonList(Sid.AvailableEnergy), false, (dependantFields, updatedField) -> {
+            final Field energyField = dependantFields.get(Sid.AvailableEnergy);
+            if (energyField == null) {
+                return Double.NaN;
+            }
+            double energy = energyField.getValue();
+            return (energy / 52.5) * 100.0;
         });
     }
 
