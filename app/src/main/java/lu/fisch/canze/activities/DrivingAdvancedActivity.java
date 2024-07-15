@@ -25,15 +25,20 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.TextView;
 
+import java.util.Arrays;
 import java.util.Locale;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.function.DoubleFunction;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import lu.fisch.canze.R;
 import lu.fisch.canze.actors.Field;
 import lu.fisch.canze.classes.Sid;
 import lu.fisch.canze.interfaces.DebugListener;
 import lu.fisch.canze.interfaces.FieldListener;
+import lu.fisch.canze.mqtt.MqttValuePusher;
 
 // If you want to monitor changes, you must add a FieldListener to the fields.
 // For the simple activity, the easiest way is to implement it in the activity itself.
@@ -45,6 +50,8 @@ public class DrivingAdvancedActivity extends CanzeActivity implements FieldListe
     private final String[] climate_Status = MainActivity.getStringList(MainActivity.isPh2() ? R.array.list_ClimateStatusPh2
             : R.array.list_ClimateStatus);
 
+    private MqttValuePusher mqttPusher;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -54,6 +61,27 @@ public class DrivingAdvancedActivity extends CanzeActivity implements FieldListe
         String baseLabel = MainActivity.getStringSingle(R.string.label_InstantConsumption);
         String unit = MainActivity.getStringSingle(MainActivity.milesMode ? R.string.unit_ConsumptionMiAlt : R.string.label_kWh100km);
         tv.setText(String.format("%s (%s)", baseLabel, unit));
+
+        if (mqttPusher != null) {
+            mqttPusher.close();
+        }
+        mqttPusher = new MqttValuePusher(UUID.randomUUID().toString());
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        if (mqttPusher != null) {
+            mqttPusher.close();
+        }
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if (mqttPusher != null) {
+            mqttPusher.close();
+        }
     }
 
     protected void initListeners() {
@@ -66,6 +94,8 @@ public class DrivingAdvancedActivity extends CanzeActivity implements FieldListe
         addField(Sid.ClimaLoopMode, 0);
         addField(Sid.InstantConsumptionByAverage, 0);
         addField(Sid.GPS_Altitude, 5000);
+        addField(Sid.UserSoC, 10000);
+        addField(Sid.DisplaySOC, 10000);
 
         if (MainActivity.isPh2()) {
             addField(Sid.ThermalComfortPower, 0);
@@ -125,9 +155,26 @@ public class DrivingAdvancedActivity extends CanzeActivity implements FieldListe
                 case Sid.GPS_Altitude:
                     setNumericValueFromField(findViewById(R.id.text_altitude), field);
                     break;
+
+                case Sid.UserSoC:
+                    setNumericalValueFromFields(findViewById(R.id.text_SOC),
+                            MainActivity.fields.getBySID(Sid.RealSoC), field);
+                    break;
+
+                case Sid.RealSoC:
+                    setNumericalValueFromFields(findViewById(R.id.text_SOC),
+                            field, MainActivity.fields.getBySID(Sid.UserSoC));
+                    break;
             }
         });
 
+    }
+
+    private void setNumericalValueFromFields(TextView tv, Field first, Field... others) {
+        String value = Stream.concat(Stream.of(first), Arrays.stream(others))
+                .map(field -> String.format(Locale.getDefault(), "%.1f", field.getValue()))
+                .collect(Collectors.joining(" - "));
+        tv.setText(value);
     }
 
     private void setNumericValueFromField(TextView tv, Field field) {
