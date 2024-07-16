@@ -107,6 +107,12 @@ public class DrivingAdvancedActivity extends CanzeActivity implements FieldListe
         } else {
             findViewById(R.id.textLabel_climatePower).setVisibility(View.GONE);
         }
+
+        if (MainActivity.mqttEnabled) {
+            addField(Sid.AvailableEnergy, 5000);
+            addField(Sid.HvTemp, 5000);
+            addField(Sid.RealSpeed, 0);
+        }
     }
 
 
@@ -122,6 +128,7 @@ public class DrivingAdvancedActivity extends CanzeActivity implements FieldListe
 
                 case Sid.EngineFanSpeed:
                     setNumericValueFromField(findViewById(R.id.text_EFS), field);
+                    mqttPusher.pushValue(field.getSID(), field.getValue());
                     break;
 
                 case Sid.InstantConsumptionByAverage:
@@ -131,15 +138,19 @@ public class DrivingAdvancedActivity extends CanzeActivity implements FieldListe
                             val -> Double.isNaN(val) ?
                                     Optional.of(MainActivity.getStringSingle(R.string.default_Dash)) :
                                     Optional.empty());
+                    mqttPusher.pushValue(field.getSID(), field.getValue());
                     break;
 
                 case Sid.ThermalComfortPower:
                     setNumericValueFromField(findViewById(R.id.text_ClimatePower), field);
+                    mqttPusher.pushValue(field.getSID(), field.getValue());
                     break;
 
-                case Sid.HvCoolingState:
-                    setTextValueFromField(findViewById(R.id.text_HCS), cooling_Status, field);
+                case Sid.HvCoolingState: {
+                    String setValue = setTextValueFromField(findViewById(R.id.text_HCS), cooling_Status, field);
+                    mqttPusher.pushValue(field.getSID(), setValue);
                     break;
+                }
 
                 case Sid.HvEvaporationTemp:
                     setNumericValueFromField(findViewById(R.id.text_HET), field);
@@ -149,26 +160,39 @@ public class DrivingAdvancedActivity extends CanzeActivity implements FieldListe
                     setNumericValueFromField(findViewById(R.id.text_PRE), field);
                     break;
 
-                case Sid.BatteryConditioningMode:
-                    setTextValueFromField(findViewById(R.id.text_HCM), conditioning_Status, field);
+                case Sid.BatteryConditioningMode: {
+                    String setValue = setTextValueFromField(findViewById(R.id.text_HCM), conditioning_Status, field);
+                    mqttPusher.pushValue(field.getSID(), setValue);
                     break;
+                }
 
-                case Sid.ClimaLoopMode:
-                    setTextValueFromField(findViewById(R.id.text_CLM), climate_Status, field);
+                case Sid.ClimaLoopMode: {
+                    String setValue = setTextValueFromField(findViewById(R.id.text_CLM), climate_Status, field);
+                    mqttPusher.pushValue(field.getSID(), setValue);
                     break;
+                }
 
                 case Sid.GPS_Altitude:
                     setNumericValueFromField(findViewById(R.id.text_altitude), field);
+                    mqttPusher.pushValue(field.getSID(), field.getValue());
                     break;
 
                 case Sid.UserSoC:
                     setNumericalValueFromFields(findViewById(R.id.text_SOC),
                             MainActivity.fields.getBySID(Sid.DisplaySOC), field);
+                    mqttPusher.pushValue(field.getSID(), field.getValue());
                     break;
 
                 case Sid.DisplaySOC:
                     setNumericalValueFromFields(findViewById(R.id.text_SOC),
                             field, MainActivity.fields.getBySID(Sid.UserSoC));
+                    mqttPusher.pushValue(field.getSID(), field.getValue());
+                    break;
+
+                case Sid.AvailableEnergy:
+                case Sid.RealSpeed:
+                case Sid.HvTemp:
+                    mqttPusher.pushValue(field.getSID(), field.getValue());
                     break;
             }
         });
@@ -193,11 +217,16 @@ public class DrivingAdvancedActivity extends CanzeActivity implements FieldListe
         }
     }
 
-    private void setTextValueFromField(TextView tv, String[] values, Field field) {
+    private String setTextValueFromField(TextView tv, String[] values, Field field) {
         int value = (int) field.getValue();
+        String valueStr;
         if (tv != null && values != null && value >= 0 && value < values.length) {
-            tv.setText(values[value]);
+            valueStr = values[value];
+            tv.setText(valueStr);
+        } else {
+            valueStr = null;
         }
+        return valueStr;
     }
 
 }
