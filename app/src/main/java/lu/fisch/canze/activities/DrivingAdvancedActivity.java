@@ -111,7 +111,8 @@ public class DrivingAdvancedActivity extends CanzeActivity implements FieldListe
         if (MainActivity.mqttEnabled) {
             addField(Sid.AvailableEnergy, 5000);
             addField(Sid.HvTemp, 5000);
-            addField(Sid.RealSpeed, 0);
+            addField(Sid.CompressorRPM, 0);
+            addField(Sid.RealSpeed, 5000);
         }
     }
 
@@ -192,6 +193,7 @@ public class DrivingAdvancedActivity extends CanzeActivity implements FieldListe
                 case Sid.AvailableEnergy:
                 case Sid.RealSpeed:
                 case Sid.HvTemp:
+                case Sid.CompressorRPM:
                     mqttPusher.pushValue(field.getSID(), field.getValue());
                     break;
             }
