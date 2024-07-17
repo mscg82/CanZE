@@ -96,6 +96,7 @@ public class MQTTPublisherActivity extends CanzeActivity implements FieldListene
         addField(Sid.AvailableChargingPower, 5000);
         addField(Sid.DcPowerIn, 5000);
         addField(Sid.UserSoC, 10000);
+        addField(Sid.RealSoC, 10000);
         addField(Sid.DisplaySOC, 10000);
         addField(Sid.GroundResistance, 0);
         addField(Sid.AvailableEnergy, 5000);
@@ -157,7 +158,12 @@ public class MQTTPublisherActivity extends CanzeActivity implements FieldListene
                     break;
 
                 case Sid.UserSoC:
-                    setNumericValueFromField(findViewById(R.id.text_soc), "%.1f", field);
+                    setNumericValueFromField(findViewById(R.id.text_usable_soc), "%.1f", field);
+                    mqttPusher.pushValue(field.getSID(), field.getValue());
+                    break;
+
+                case Sid.RealSoC:
+                    setNumericValueFromField(findViewById(R.id.text_real_soc), "%.1f", field);
                     mqttPusher.pushValue(field.getSID(), field.getValue());
                     break;
 

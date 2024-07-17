@@ -113,6 +113,7 @@ public class DrivingAdvancedActivity extends CanzeActivity implements FieldListe
             addField(Sid.HvTemp, 5000);
             addField(Sid.CompressorRPM, 0);
             addField(Sid.RealSpeed, 5000);
+            addField(Sid.RealSoC, 10000);
         }
     }
 
@@ -194,6 +195,7 @@ public class DrivingAdvancedActivity extends CanzeActivity implements FieldListe
                 case Sid.RealSpeed:
                 case Sid.HvTemp:
                 case Sid.CompressorRPM:
+                case Sid.RealSoC:
                     mqttPusher.pushValue(field.getSID(), field.getValue());
                     break;
             }
