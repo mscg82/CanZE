@@ -13,6 +13,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Locale;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.atomic.AtomicReference;
 
 import lu.fisch.canze.activities.MainActivity;
@@ -84,18 +85,22 @@ public class MqttValuePusher implements AutoCloseable {
             return;
         }
 
-        this.asyncExecutor.submit(() -> {
-            try {
-                IMqttClient mqttClient = this.mqttClient.get();
-                if (mqttClient != null && mqttClient.isConnected()) {
-                    MqttMessage msg = new MqttMessage(value.getBytes(StandardCharsets.UTF_8));
-                    msg.setQos(0);
-                    mqttClient.publish("zoe/obd/" + sid, msg);
+        try {
+            this.asyncExecutor.submit(() -> {
+                try {
+                    IMqttClient mqttClient = this.mqttClient.get();
+                    if (mqttClient != null && mqttClient.isConnected()) {
+                        MqttMessage msg = new MqttMessage(value.getBytes(StandardCharsets.UTF_8));
+                        msg.setQos(0);
+                        mqttClient.publish("zoe/obd/" + sid, msg);
+                    }
+                } catch (Exception e) {
+                    Log.e(MainActivity.TAG, "Failed to send message to MQTT broker for sid " + sid, e);
                 }
-            } catch (Exception e) {
-                Log.e(MainActivity.TAG, "Failed to send message to MQTT broker for sid " + sid, e);
-            }
-        });
+            });
+        } catch (RejectedExecutionException e) {
+            Log.e(MainActivity.TAG, "Failed to enqueue push action for sid " + sid, e);
+        }
     }
 
     @Override

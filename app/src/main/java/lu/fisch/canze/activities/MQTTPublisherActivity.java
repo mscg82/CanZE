@@ -58,20 +58,10 @@ public class MQTTPublisherActivity extends CanzeActivity implements FieldListene
     }
 
     @Override
-    protected void onPause() {
-        super.onPause();
-        if (mqttPusher != null) {
-            mqttPusher.close();
-            mqttPusher = null;
-        }
-    }
-
-    @Override
     protected void onDestroy() {
         super.onDestroy();
         if (mqttPusher != null) {
             mqttPusher.close();
-            mqttPusher = null;
         }
     }
 

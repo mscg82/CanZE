@@ -254,6 +254,10 @@ public class Fields {
                         Instant runTime = Instant.now();
 
                         Field testField = getBySID(Sid.TestFieldClock);
+                        if (testField == null) {
+                            return;
+                        }
+
                         testField.setValue((runTime.toEpochMilli() - start.toEpochMilli()) / 1000.0);
 
                         TimeUnit.MILLISECONDS.sleep(200);

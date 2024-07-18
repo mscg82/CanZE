@@ -69,20 +69,10 @@ public class DrivingAdvancedActivity extends CanzeActivity implements FieldListe
     }
 
     @Override
-    protected void onPause() {
-        super.onPause();
-        if (mqttPusher != null) {
-            mqttPusher.close();
-            mqttPusher = null;
-        }
-    }
-
-    @Override
     protected void onDestroy() {
         super.onDestroy();
         if (mqttPusher != null) {
             mqttPusher.close();
-            mqttPusher = null;
         }
     }
 
