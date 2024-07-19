@@ -235,7 +235,15 @@ public class Fields {
                 return Double.NaN;
             }
             double energy = energyField.getValue();
-            return Math.min(energy * 2.0, 100.0);
+            final double referenceEnergy;
+            if (energy >= 44.5) {
+                referenceEnergy = 50.0;
+            } else if (energy >= 26.5) {
+                referenceEnergy = 51.5;
+            } else {
+               referenceEnergy = 52.5;
+            }
+            return Math.min(energy * (100.0 / referenceEnergy), 100.0);
         });
     }
 
