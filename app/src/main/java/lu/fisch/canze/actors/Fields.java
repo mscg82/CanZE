@@ -237,7 +237,7 @@ public class Fields {
             double energy = energyField.getValue();
             final double referenceEnergy;
             if (energy >= 44.5) {
-                referenceEnergy = 50.0;
+                referenceEnergy = 50.5;
             } else if (energy >= 26.5) {
                 referenceEnergy = 51.5;
             } else {
