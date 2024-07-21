@@ -29,6 +29,7 @@ import java.util.Arrays;
 import java.util.Locale;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.DoubleFunction;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -91,6 +92,7 @@ public class DrivingAdvancedActivity extends CanzeActivity implements FieldListe
         addField(Sid.GPS_Altitude, 5000);
         addField(Sid.UserSoC, 10000);
         addField(Sid.DisplaySOC, 10000);
+        addField(Sid.TestFieldClock, 0);
 
         if (MainActivity.isPh2()) {
             addField(Sid.ThermalComfortPower, 0);
@@ -114,6 +116,7 @@ public class DrivingAdvancedActivity extends CanzeActivity implements FieldListe
     public void onFieldUpdateEvent(final Field field) {
         // the update has to be done in a separate thread
         // otherwise the UI will not be repainted
+        final AtomicLong lastMqttUpdate = new AtomicLong(Long.MIN_VALUE);
         runOnUiThread(() -> {
             // get the text field
             switch (field.getSID()) {
@@ -187,6 +190,17 @@ public class DrivingAdvancedActivity extends CanzeActivity implements FieldListe
                 case Sid.CompressorRPM:
                 case Sid.RealSoC:
                     mqttPusher.pushValue(field.getSID(), field.getValue());
+                    break;
+
+                case Sid.TestFieldClock:
+                    long now = System.currentTimeMillis();
+                    if (now >= lastMqttUpdate.get() + 1_000L) {
+                        lastMqttUpdate.set(now);
+                        int stringIndex = mqttPusher.isConnected() ?
+                                R.string.default_debug_mqtt_connected :
+                                R.string.default_debug_mqtt_disconnected;
+                        ((TextView) findViewById(R.id.textMqtt)).setText(MainActivity.getStringSingle(stringIndex));
+                    }
                     break;
             }
         });

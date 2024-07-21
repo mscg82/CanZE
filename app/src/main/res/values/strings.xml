@@ -45,6 +45,11 @@
     <string name="label_debug">Debug\u0020</string>
     <string name="default_debug">#Debug</string>
 
+    <string name="label_debug_mqtt">MQTT\u0020</string>
+    <string name="default_debug_mqtt">#MQTT</string>
+    <string name="default_debug_mqtt_connected">Connected</string>
+    <string name="default_debug_mqtt_disconnected">Disconnected</string>
+
     <!-- *************************** SELECTION SCREENS (MAIN AND FRAGMENTS) *************************** -->
 
     <!-- Mainactivity -->
