@@ -66,7 +66,13 @@ public class DrivingAdvancedActivity extends CanzeActivity implements FieldListe
         if (mqttPusher != null) {
             mqttPusher.close();
         }
-        mqttPusher = new MqttValuePusher(UUID.randomUUID().toString());
+        mqttPusher = new MqttValuePusher(UUID.randomUUID().toString(),
+                connected -> runOnUiThread(() -> {
+                    int stringIndex = connected ?
+                            R.string.default_debug_mqtt_connected :
+                            R.string.default_debug_mqtt_disconnected;
+                    ((TextView) findViewById(R.id.textMqtt)).setText(MainActivity.getStringSingle(stringIndex));
+                }));
     }
 
     @Override
@@ -74,6 +80,7 @@ public class DrivingAdvancedActivity extends CanzeActivity implements FieldListe
         super.onDestroy();
         if (mqttPusher != null) {
             mqttPusher.close();
+            mqttPusher = null;
         }
     }
 
@@ -92,7 +99,6 @@ public class DrivingAdvancedActivity extends CanzeActivity implements FieldListe
         addField(Sid.GPS_Altitude, 5000);
         addField(Sid.UserSoC, 10000);
         addField(Sid.DisplaySOC, 10000);
-        addField(Sid.TestFieldClock, 0);
 
         if (MainActivity.isPh2()) {
             addField(Sid.ThermalComfortPower, 0);
@@ -108,7 +114,6 @@ public class DrivingAdvancedActivity extends CanzeActivity implements FieldListe
             addField(Sid.RealSoC, 10000);
         }
     }
-
 
     // This is the event fired as soon as this the registered fields are
     // getting updated by the corresponding reader class.
@@ -190,17 +195,6 @@ public class DrivingAdvancedActivity extends CanzeActivity implements FieldListe
                 case Sid.CompressorRPM:
                 case Sid.RealSoC:
                     mqttPusher.pushValue(field.getSID(), field.getValue());
-                    break;
-
-                case Sid.TestFieldClock:
-                    long now = System.currentTimeMillis();
-                    if (now >= lastMqttUpdate.get() + 1_000L) {
-                        lastMqttUpdate.set(now);
-                        int stringIndex = mqttPusher.isConnected() ?
-                                R.string.default_debug_mqtt_connected :
-                                R.string.default_debug_mqtt_disconnected;
-                        ((TextView) findViewById(R.id.textMqtt)).setText(MainActivity.getStringSingle(stringIndex));
-                    }
                     break;
             }
         });

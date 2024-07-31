@@ -55,7 +55,13 @@ public class MQTTPublisherActivity extends CanzeActivity implements FieldListene
         if (mqttPusher != null) {
             mqttPusher.close();
         }
-        mqttPusher = new MqttValuePusher(UUID.randomUUID().toString());
+        mqttPusher = new MqttValuePusher(UUID.randomUUID().toString(),
+                connected -> runOnUiThread(() -> {
+                    int stringIndex = connected ?
+                            R.string.default_debug_mqtt_connected :
+                            R.string.default_debug_mqtt_disconnected;
+                    ((TextView) findViewById(R.id.textMqtt)).setText(MainActivity.getStringSingle(stringIndex));
+                }));
     }
 
     @Override
@@ -63,6 +69,7 @@ public class MQTTPublisherActivity extends CanzeActivity implements FieldListene
         super.onDestroy();
         if (mqttPusher != null) {
             mqttPusher.close();
+            mqttPusher = null;
         }
     }
 
@@ -91,7 +98,6 @@ public class MQTTPublisherActivity extends CanzeActivity implements FieldListene
         addField(Sid.DisplaySOC, 10000);
         addField(Sid.GroundResistance, 0);
         addField(Sid.AvailableEnergy, 5000);
-        addField(Sid.TestFieldClock, 0);
         if (MainActivity.mqttTestEnabled) {
             addField(Sid.TestField1, 0);
         }
@@ -179,17 +185,6 @@ public class MQTTPublisherActivity extends CanzeActivity implements FieldListene
 
                 case Sid.TestField1:
                     mqttPusher.pushValue(field.getSID(), field.getValue());
-                    break;
-
-                case Sid.TestFieldClock:
-                    long now = System.currentTimeMillis();
-                    if (now >= lastMqttUpdate.get() + 1_000L) {
-                        lastMqttUpdate.set(now);
-                        int stringIndex = mqttPusher.isConnected() ?
-                                R.string.default_debug_mqtt_connected :
-                                R.string.default_debug_mqtt_disconnected;
-                        ((TextView) findViewById(R.id.textMqtt)).setText(MainActivity.getStringSingle(stringIndex));
-                    }
                     break;
             }
         });

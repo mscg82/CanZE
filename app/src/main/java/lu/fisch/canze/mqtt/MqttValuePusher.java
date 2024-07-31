@@ -5,89 +5,87 @@ import android.util.Log;
 import com.google.android.gms.common.util.concurrent.NumberedThreadFactory;
 
 import org.eclipse.paho.client.mqttv3.IMqttClient;
+import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken;
+import org.eclipse.paho.client.mqttv3.MqttCallbackExtended;
 import org.eclipse.paho.client.mqttv3.MqttClient;
 import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
 import org.eclipse.paho.client.mqttv3.MqttMessage;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Locale;
-import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.concurrent.RejectedExecutionException;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicLong;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Consumer;
 
 import lu.fisch.canze.activities.MainActivity;
 
 public class MqttValuePusher implements AutoCloseable {
 
-    private static final long NO_DISCONNECTION_FOUND = Long.MIN_VALUE;
-
-    private final AtomicReference<IMqttClient> mqttClient;
-    private final ExecutorService asyncExecutor;
+    private final IMqttClient mqttClient;
+    private final ScheduledExecutorService asyncExecutor;
     private final Runnable connectionAction;
-    private final AtomicBoolean connecting;
-    private final AtomicLong lastDisconnection;
+    private final AtomicReference<Future<?>> reconnectAction;
+    private final Consumer<Boolean> mqttConnectionListener;
 
-    public MqttValuePusher(String publisherId) {
-        this(publisherId, MainActivity.mqttConnectionUri, MainActivity.mqttConnectionUsername, MainActivity.mqttConnectionPassword);
+    public MqttValuePusher(String publisherId, Consumer<Boolean> mqttConnectionListener) {
+        this(publisherId,
+                MainActivity.mqttConnectionUri, MainActivity.mqttConnectionUsername, MainActivity.mqttConnectionPassword,
+                mqttConnectionListener);
     }
 
-    public MqttValuePusher(String publisherId, String url, String username, char[] password) {
-        this.lastDisconnection = new AtomicLong(NO_DISCONNECTION_FOUND);
-        this.connecting = new AtomicBoolean(false);
-        this.mqttClient = new AtomicReference<>(null);
+    public MqttValuePusher(String publisherId, String url, String username, char[] password,
+                           Consumer<Boolean> mqttConnectionListener) {
+        IMqttClient mqttClient;
+        try {
+            mqttClient = new MqttClient(url, publisherId, new InMemoryPersistence());
+        } catch (Exception e) {
+            mqttClient = null;
+            Log.w(MainActivity.TAG, "Failed to initialize MQTT client", e);
+        }
+        this.mqttClient = mqttClient;
+        setCallback();
         NumberedThreadFactory threadFactory = new NumberedThreadFactory("mqtt-pool-");
-        this.asyncExecutor = Executors.newSingleThreadExecutor(threadFactory);
+        this.asyncExecutor = Executors.newScheduledThreadPool(1, threadFactory);
+
         this.connectionAction = () -> {
             try {
-                if (this.connecting.compareAndSet(false, true)) {
-                    IMqttClient internalMqttClient = new MqttClient(url, publisherId, new InMemoryPersistence());
-
-                    MqttConnectOptions options = new MqttConnectOptions();
-                    if (username != null && !username.trim().isEmpty()) {
-                        options.setUserName(username);
-                    }
-                    if (password != null) {
-                        options.setPassword(password);
-                    }
-                    options.setAutomaticReconnect(true);
-                    options.setCleanSession(true);
-                    options.setConnectionTimeout(10);
-                    internalMqttClient.connect(options);
-
-                    this.lastDisconnection.set(NO_DISCONNECTION_FOUND);
-
-                    closeClient(this.mqttClient.getAndSet(internalMqttClient));
-                }
-                else {
-                    Log.d(MainActivity.TAG, "Another thread is connecting to MQTT broker");
+                if (this.mqttClient != null && !this.mqttClient.isConnected()) {
+                    MqttConnectOptions options = getMqttConnectOptions(username, password);
+                    this.mqttClient.connect(options);
                 }
             } catch (Exception e) {
                 Log.e(MainActivity.TAG, "Failed to connect to MQTT broker", e);
-            } finally {
-                this.connecting.set(false);
             }
         };
 
+        this.reconnectAction = new AtomicReference<>(null);
+        this.mqttConnectionListener = mqttConnectionListener;
+    }
 
+    private MqttConnectOptions getMqttConnectOptions(String username, char[] password) {
+        MqttConnectOptions options = new MqttConnectOptions();
+        if (username != null && !username.trim().isEmpty()) {
+            options.setUserName(username);
+        }
+        if (password != null) {
+            options.setPassword(password);
+        }
+        options.setAutomaticReconnect(true);
+        options.setCleanSession(true);
+        options.setConnectionTimeout(10);
+        return options;
+    }
+
+    public boolean isConnected() {
+        return mqttClient != null && mqttClient.isConnected();
     }
 
     public void connect() {
         connectAndThen(null);
-    }
-
-    public boolean isConnected()
-    {
-        IMqttClient mqttClient = this.mqttClient.get();
-        if (mqttClient == null || !mqttClient.isConnected()) {
-            this.lastDisconnection.compareAndSet(NO_DISCONNECTION_FOUND, System.currentTimeMillis());
-            return false;
-        }
-
-        this.lastDisconnection.set(NO_DISCONNECTION_FOUND);
-        return true;
     }
 
     public void connectAndThen(Runnable additionalAction) {
@@ -117,21 +115,10 @@ public class MqttValuePusher implements AutoCloseable {
         try {
             this.asyncExecutor.submit(() -> {
                 try {
-                    IMqttClient mqttClient = this.mqttClient.get();
-                    if (mqttClient != null) {
-                        if (isConnected()) {
-                            MqttMessage msg = new MqttMessage(value.getBytes(StandardCharsets.UTF_8));
-                            msg.setQos(0);
-                            mqttClient.publish("zoe/obd/" + sid, msg);
-                        } else {
-                            long now = System.currentTimeMillis();
-                            if (now - this.lastDisconnection.get() >= 30_000L) {
-                                this.lastDisconnection.set(NO_DISCONNECTION_FOUND);
-                                this.connectionAction.run();
-                            } else {
-                                mqttClient.reconnect();
-                            }
-                        }
+                    if (isConnected()) {
+                        MqttMessage msg = new MqttMessage(value.getBytes(StandardCharsets.UTF_8));
+                        msg.setQos(0);
+                        mqttClient.publish("zoe/obd/" + sid, msg);
                     }
                 } catch (Exception e) {
                     Log.e(MainActivity.TAG, "Failed to send message to MQTT broker for sid " + sid, e);
@@ -144,18 +131,78 @@ public class MqttValuePusher implements AutoCloseable {
 
     @Override
     public void close() {
-        closeClient(this.mqttClient.getAndSet(null));
+        closeClient();
         this.asyncExecutor.shutdownNow();
     }
 
-    private void closeClient(IMqttClient client) {
-        String publisherId = client == null ? "<>" : client.getClientId();
+    private void closeClient() {
+        String publisherId = mqttClient == null ? "<>" : mqttClient.getClientId();
         try {
-            if (client != null) {
-                client.close();
+            if (mqttClient != null) {
+                try {
+                    mqttClient.disconnect();
+                } finally {
+                    mqttClient.close();
+                }
             }
         } catch (Exception e) {
             Log.w(MainActivity.TAG, "An error occurred while closing MQTT client with publisher id " + publisherId, e);
+        }
+    }
+
+    private void setCallback() {
+        if (this.mqttClient != null) {
+            this.mqttClient.setCallback(new MqttCallbackExtended() {
+                @Override
+                public void connectComplete(boolean reconnect, String serverURI) {
+                    Future<?> actionToStop = reconnectAction.getAndSet(null);
+                    if (actionToStop != null) {
+                        actionToStop.cancel(true);
+                    }
+                    if (mqttConnectionListener != null) {
+                        mqttConnectionListener.accept(true);
+                    }
+                }
+
+                @Override
+                public void connectionLost(Throwable cause) {
+                    reconnectAction.updateAndGet(oldAction -> {
+                        if (oldAction != null) {
+                            return oldAction;
+                        }
+
+                        return asyncExecutor.schedule(this::reconnect, 30L, TimeUnit.SECONDS);
+                    });
+                    if (mqttConnectionListener != null) {
+                        mqttConnectionListener.accept(false);
+                    }
+                }
+
+                @Override
+                public void messageArrived(String topic, MqttMessage message) throws Exception {
+                    // NOTHING TO DO
+                }
+
+                @Override
+                public void deliveryComplete(IMqttDeliveryToken token) {
+                    // NOTHING TO DO
+                }
+
+                private void reconnect() {
+                    try {
+                        mqttClient.reconnect();
+                    } catch (Exception e) {
+                        Log.w(MainActivity.TAG, "Failed to reconnect to MQTT broker", e);
+
+                        if (!Thread.currentThread().isInterrupted()) {
+                            Future<?> oldAction = reconnectAction.getAndSet(asyncExecutor.schedule(this::reconnect, 30L, TimeUnit.SECONDS));
+                            if (oldAction != null) {
+                                oldAction.cancel(true);
+                            }
+                        }
+                    }
+                }
+            });
         }
     }
 }
