@@ -32,6 +32,8 @@ import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
 
+import androidx.annotation.VisibleForTesting;
+
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
@@ -47,6 +49,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.TimeUnit;
+import java.util.function.DoubleUnaryOperator;
 
 import lu.fisch.canze.R;
 import lu.fisch.canze.activities.MainActivity;
@@ -227,24 +230,51 @@ public class Fields {
         });
     }
 
-    private void addVirtualFieldSOC()
-    {
+    private void addVirtualFieldSOC() {
         addVirtualFieldCommon("6600", 1, "%", (short) 0x8ff, Collections.singletonList(Sid.AvailableEnergy), false, (dependantFields, updatedField) -> {
             final Field energyField = dependantFields.get(Sid.AvailableEnergy);
             if (energyField == null) {
                 return Double.NaN;
             }
-            double energy = energyField.getValue();
-            final double referenceEnergy;
-            if (energy >= 44.5) {
-                referenceEnergy = 50.5;
-            } else if (energy >= 26.5) {
-                referenceEnergy = 51.5;
-            } else {
-               referenceEnergy = 52.5;
-            }
-            return Math.min(energy * (100.0 / referenceEnergy), 100.0);
+            return computeSoCFromEnergy(energyField.getValue());
         });
+    }
+
+    @VisibleForTesting
+    protected static double computeSoCFromEnergy(double energy) {
+        DoubleUnaryOperator linearLow = e -> Math.min(e * (100.0 / 52.5), 100.0);
+        DoubleUnaryOperator linearMid = e -> Math.min(e * (100.0 / 51.5), 100.0);
+        DoubleUnaryOperator linearHigh = e -> Math.min(e * (100.0 / 50.5), 100.0);
+
+        if (energy >= 45.5) {
+            // linear
+            return linearHigh.applyAsDouble(energy);
+        }
+
+        if (energy >= 43.5) {
+            // interpolation around 44.5
+            double phi = computeStepFunction(energy, 43.5, 45.5);
+            return Math.min((1 - phi) * linearMid.applyAsDouble(energy) + phi * linearHigh.applyAsDouble(energy), 100.0);
+        }
+
+        if (energy >= 27.5) {
+            // linear
+            return linearMid.applyAsDouble(energy);
+        }
+
+        if (energy >= 25.5) {
+            // interpolation around 26.5
+            double phi = computeStepFunction(energy, 25.5, 27.5);
+            return Math.min((1 - phi) * linearLow.applyAsDouble(energy) + phi * linearMid.applyAsDouble(energy), 100.0);
+        }
+
+        // linear
+        return linearLow.applyAsDouble(energy);
+    }
+
+    private static double computeStepFunction(double value, double a, double b) {
+        double x = (value - a) / (b - a);
+        return 1 / (1 + Math.exp((1 - 2 * x) / (x * (1 - x))));
     }
 
     private synchronized void virtualTestFieldsPropel(boolean startStop) {
