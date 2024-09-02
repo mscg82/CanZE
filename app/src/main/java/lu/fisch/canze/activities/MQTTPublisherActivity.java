@@ -75,6 +75,13 @@ public class MQTTPublisherActivity extends CanzeActivity implements FieldListene
 
     @Override
     protected void initListenerAndPropelFields() {
+        if (MainActivity.mqttEnabled) {
+            findViewById(R.id.MQTTDebug).setVisibility(View.VISIBLE);
+        }
+        else {
+            findViewById(R.id.MQTTDebug).setVisibility(View.GONE);
+        }
+
         mqttPusher.connectAndThen(() -> runOnUiThread(super::initListenerAndPropelFields));
     }
 
@@ -98,6 +105,8 @@ public class MQTTPublisherActivity extends CanzeActivity implements FieldListene
         addField(Sid.DisplaySOC, 10000);
         addField(Sid.GroundResistance, 0);
         addField(Sid.AvailableEnergy, 5000);
+        addField(Sid.HvKilometers, 5000);
+        addField(Sid.TractionBatteryVoltage, 5000);
         if (MainActivity.mqttTestEnabled) {
             addField(Sid.TestField1, 0);
         }
@@ -180,6 +189,16 @@ public class MQTTPublisherActivity extends CanzeActivity implements FieldListene
 
                 case Sid.AvailableEnergy:
                     setNumericValueFromField(findViewById(R.id.text_energy), "%.2f", field);
+                    mqttPusher.pushValue(field.getSID(), field.getValue());
+                    break;
+
+                case Sid.HvKilometers:
+                    setNumericValueFromField(findViewById(R.id.text_HKM), "%.2f", field);
+                    mqttPusher.pushValue(field.getSID(), field.getValue());
+                    break;
+
+                case Sid.TractionBatteryVoltage:
+                    setNumericValueFromField(findViewById(R.id.text_volt), "%.2f", field);
                     mqttPusher.pushValue(field.getSID(), field.getValue());
                     break;
 

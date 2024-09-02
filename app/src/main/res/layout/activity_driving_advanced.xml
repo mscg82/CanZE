@@ -312,6 +312,7 @@
             android:layout_height="20dp" />
 
         <LinearLayout
+            android:id="@+id/MQTTDebug"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"

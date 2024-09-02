@@ -107,11 +107,17 @@ public class DrivingAdvancedActivity extends CanzeActivity implements FieldListe
         }
 
         if (MainActivity.mqttEnabled) {
+            findViewById(R.id.MQTTDebug).setVisibility(View.VISIBLE);
+
             addField(Sid.AvailableEnergy, 5000);
             addField(Sid.HvTemp, 5000);
             addField(Sid.CompressorRPM, 0);
             addField(Sid.RealSpeed, 5000);
             addField(Sid.RealSoC, 10000);
+            addField(Sid.HvKilometers, 5000);
+            addField(Sid.TractionBatteryVoltage, 5000);
+        } else {
+            findViewById(R.id.MQTTDebug).setVisibility(View.GONE);
         }
     }
 
@@ -194,6 +200,8 @@ public class DrivingAdvancedActivity extends CanzeActivity implements FieldListe
                 case Sid.HvTemp:
                 case Sid.CompressorRPM:
                 case Sid.RealSoC:
+                case Sid.HvKilometers:
+                case Sid.TractionBatteryVoltage:
                     mqttPusher.pushValue(field.getSID(), field.getValue());
                     break;
             }

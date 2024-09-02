@@ -201,6 +201,34 @@
                 android:text="@string/default_Dash" />
         </TableRow>
 
+        <TableRow>
+            <TextView
+                android:layout_weight="0.7"
+                android:width="0dp"
+                android:text="@string/label_Volt" />
+
+            <TextView
+                android:id="@+id/text_volt"
+                android:layout_weight="0.3"
+                android:width="0dp"
+                android:gravity="end"
+                android:text="@string/default_Dash" />
+        </TableRow>
+
+        <TableRow>
+            <TextView
+                android:layout_weight="0.7"
+                android:width="0dp"
+                android:text="@string/label_HKM" />
+
+            <TextView
+                android:id="@+id/text_HKM"
+                android:layout_weight="0.3"
+                android:width="0dp"
+                android:gravity="end"
+                android:text="@string/default_Dash" />
+        </TableRow>
+
     </TableLayout>
 
 
@@ -236,6 +264,7 @@
             android:layout_height="20dp" />
         
         <LinearLayout
+            android:id="@+id/MQTTDebug"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"

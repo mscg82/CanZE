@@ -92,7 +92,7 @@ public class MqttValuePusher implements AutoCloseable {
         if (MainActivity.mqttEnabled) {
             this.asyncExecutor.submit(() -> {
                 this.connectionAction.run();
-                if (additionalAction != null) {
+                if (additionalAction != null && isConnected()) {
                     additionalAction.run();
                 }
             });
@@ -140,7 +140,7 @@ public class MqttValuePusher implements AutoCloseable {
         try {
             if (mqttClient != null) {
                 try {
-                    mqttClient.disconnect();
+                    mqttClient.disconnect(TimeUnit.SECONDS.toMillis(2));
                 } finally {
                     mqttClient.close();
                 }
