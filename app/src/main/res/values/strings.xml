@@ -373,6 +373,7 @@
     <string name="label_ETF">Energy to full (kWh)</string>
     <string name="label_DISTA">Available range</string>
     <string name="label_Volt">HV Battery voltage (V)</string>
+    <string name="label_Volt_smooth">Smooth HV Battery voltage (V)</string>
     <string name="label_Amps">HV Battery current (A)</string>
     <string name="label_DcPwr">DC Power (kW)</string>
     <string name="label_AvChPwr">Available\ncharging power (kW)</string>

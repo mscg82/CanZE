@@ -122,6 +122,7 @@ public class Fields {
         addVirtualFieldPilotAmp();
         addVirtualFieldUsageByAverage();
         addVirtualFieldUsageByIntegration();
+        addVirtualFieldSmoothTractionBatteryVoltage();
         addVirtualFieldGps();
         addVirtualFieldAltitude();
         addVirtualTestFieldClock();
@@ -139,6 +140,9 @@ public class Fields {
                 break;
             case "6501":
                 addVirtualFieldUsageByIntegration();
+                break;
+            case "6502":
+                addVirtualFieldSmoothTractionBatteryVoltage();
                 break;
             case "6104":
                 addVirtualFieldUsageLpf();
@@ -368,7 +372,7 @@ public class Fields {
                         break;
 
                     case Sid.RealSpeed:
-                        appendValue(realSpeeds, updatedField.getValue());
+                        appendValue(realSpeeds, MAX_VALUES, updatedField.getValue());
                         break;
                 }
 
@@ -390,7 +394,7 @@ public class Fields {
 
             private void computePower() {
                 if (!Double.isNaN(lastCurrent) && !Double.isNaN(lastVoltage)) {
-                    appendValue(dcPwrs, lastCurrent * lastVoltage / -1000.0);
+                    appendValue(dcPwrs, MAX_VALUES, lastCurrent * lastVoltage / -1000.0);
 
                     lastCurrent = Double.NaN;
                     lastVoltage = Double.NaN;
@@ -403,13 +407,6 @@ public class Fields {
 
                 lastVoltage = Double.NaN;
                 lastCurrent = Double.NaN;
-            }
-
-            private void appendValue(Deque<Double> values, double value) {
-                if (values.size() == MAX_VALUES) {
-                    values.removeFirst();
-                }
-                values.addLast(value);
             }
 
             @Override
@@ -425,6 +422,13 @@ public class Fields {
                 true, new UsageByAverageAction());
     }
 
+    private static void appendValue(Deque<Double> values, int maxValues, double value) {
+        if (values.size() == maxValues) {
+            values.removeFirst();
+        }
+        values.addLast(value);
+    }
+
     private static double averageValues(Deque<Double> values) {
         return values.stream()
                 .mapToDouble(Double::doubleValue)
@@ -434,6 +438,35 @@ public class Fields {
 
     private void addVirtualFieldUsageByIntegration() {
         // TODO
+    }
+
+    private void addVirtualFieldSmoothTractionBatteryVoltage() {
+        class VoltageByAverageAction implements VirtualFieldAction {
+            private static final int MAX_VALUES = 10;
+
+            private final Deque<Double> voltages = new ArrayDeque<>(MAX_VALUES);
+
+            @Override
+            public double updateValue(HashMap<String, Field> dependantFields, Field updatedField) {
+                //noinspection SwitchStatementWithTooFewBranches
+                switch (updatedField.getSID()) {
+                    case Sid.TractionBatteryVoltage:
+                        appendValue(voltages, MAX_VALUES, updatedField.getValue());
+                        break;
+                }
+
+                return averageValues(voltages);
+            }
+
+            @Override
+            public void reset() {
+                voltages.clear();
+            }
+        }
+
+        addVirtualFieldCommon("6502", 2, "V", (short) 0,
+                Collections.singletonList(Sid.TractionBatteryVoltage),
+                true, new VoltageByAverageAction());
     }
 
     private void addVirtualFieldFrictionTorque() {
