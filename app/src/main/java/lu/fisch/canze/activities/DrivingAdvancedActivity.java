@@ -116,6 +116,9 @@ public class DrivingAdvancedActivity extends CanzeActivity implements FieldListe
             addField(Sid.RealSoC, 10000);
             addField(Sid.TractionBatteryVoltage, 5000);
             addField(Sid.SmoothTractionBatteryVoltage, 5000);
+            addField(Sid.DcPowerIn, 5000);
+            addField(Sid.InternalTemperature, 5000);
+            addField(Sid.ExternalTemperature, 5000);
         } else {
             findViewById(R.id.MQTTDebug).setVisibility(View.GONE);
         }
@@ -202,6 +205,9 @@ public class DrivingAdvancedActivity extends CanzeActivity implements FieldListe
                 case Sid.RealSoC:
                 case Sid.TractionBatteryVoltage:
                 case Sid.SmoothTractionBatteryVoltage:
+                case Sid.DcPowerIn:
+                case Sid.InternalTemperature:
+                case Sid.ExternalTemperature:
                     mqttPusher.pushValue(field.getSID(), field.getValue());
                     break;
             }

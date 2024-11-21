@@ -47,6 +47,8 @@ public class Sid {
     public static final String Pressure                             = "764.6143.134";
     public static final String OH_ClimTempDisplay                   = "764.6145.29";
     public static final String CompressorRPM                        = "764.6144.107";
+    public static final String InternalTemperature                  = "764.6121.26";
+    public static final String ExternalTemperature                  = "764.6143.110";
 
     public static final String TpmsState                            = "765.6171.16";
 

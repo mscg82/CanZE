@@ -27,7 +27,6 @@ import android.widget.TextView;
 
 import java.util.Locale;
 import java.util.UUID;
-import java.util.concurrent.atomic.AtomicLong;
 
 import lu.fisch.canze.R;
 import lu.fisch.canze.actors.Field;
@@ -120,7 +119,6 @@ public class MQTTPublisherActivity extends CanzeActivity implements FieldListene
     public void onFieldUpdateEvent(final Field field) {
         // the update has to be done in a separate thread
         // otherwise the UI will not be repainted
-        final AtomicLong lastMqttUpdate = new AtomicLong(Long.MIN_VALUE);
         runOnUiThread(() -> {
             // get the text field
             switch (field.getSID()) {
