@@ -49,7 +49,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.TimeUnit;
-import java.util.function.DoubleUnaryOperator;
 
 import lu.fisch.canze.R;
 import lu.fisch.canze.activities.MainActivity;
@@ -103,7 +102,6 @@ public class Fields {
         if (instance == null) instance = new Fields();
         return instance;
     }
-
 
     private void addVirtualFields() {
         addVirtualFieldUsage();
@@ -240,40 +238,61 @@ public class Fields {
             if (energyField == null) {
                 return Double.NaN;
             }
-            return computeSoCFromEnergy(energyField.getValue());
+            return computeSoCFromEnergy(energyField.getValue(), 25.0);
         });
     }
 
-    @VisibleForTesting
-    protected static double computeSoCFromEnergy(double energy) {
-        DoubleUnaryOperator linearLow = e -> Math.min(e * (100.0 / 52.5), 100.0);
-        DoubleUnaryOperator linearMid = e -> Math.min(e * (100.0 / 51.5), 100.0);
-        DoubleUnaryOperator linearHigh = e -> Math.min(e * (100.0 / 50.5), 100.0);
+    private static double computeCapacity(double temperature, double lowValue, double highValue) {
+        if (temperature >= 20.2) {
+            return highValue;
+        }
 
+        if (temperature >= 19.8) {
+            double phi = computeStepFunction(temperature, 19.8, 20.2);
+            return (1 - phi) * lowValue + phi * highValue;
+        }
+
+        return lowValue;
+    }
+
+    private static double computeSoCLowEnergy(double e, double temperature) {
+        return Math.min(e * (100.0 / computeCapacity(temperature, 50.0, 52.5)), 100.0);
+    }
+
+    private static double computeSoCMidEnergy(double e, double temperature) {
+        return Math.min(e * (100.0 / computeCapacity(temperature, 49.5, 51.5)), 100.0);
+    }
+
+    private static double computeSoCHighEnergy(double e, double temperature) {
+        return Math.min(e * (100.0 / computeCapacity(temperature, 49.0, 50.5)), 100.0);
+    }
+
+    @VisibleForTesting
+    protected static double computeSoCFromEnergy(double energy, double temperature) {
         if (energy >= 45.5) {
             // linear
-            return linearHigh.applyAsDouble(energy);
+            return computeSoCHighEnergy(energy, temperature);
         }
 
         if (energy >= 43.5) {
             // interpolation around 44.5
             double phi = computeStepFunction(energy, 43.5, 45.5);
-            return Math.min((1 - phi) * linearMid.applyAsDouble(energy) + phi * linearHigh.applyAsDouble(energy), 100.0);
+            return Math.min((1 - phi) * computeSoCMidEnergy(energy, temperature) + phi * computeSoCHighEnergy(energy, temperature), 100.0);
         }
 
         if (energy >= 27.5) {
             // linear
-            return linearMid.applyAsDouble(energy);
+            return computeSoCMidEnergy(energy, temperature);
         }
 
         if (energy >= 25.5) {
             // interpolation around 26.5
             double phi = computeStepFunction(energy, 25.5, 27.5);
-            return Math.min((1 - phi) * linearLow.applyAsDouble(energy) + phi * linearMid.applyAsDouble(energy), 100.0);
+            return Math.min((1 - phi) * computeSoCLowEnergy(energy, temperature) + phi * computeSoCMidEnergy(energy, temperature), 100.0);
         }
 
         // linear
-        return linearLow.applyAsDouble(energy);
+        return computeSoCLowEnergy(energy, temperature);
     }
 
     private static double computeStepFunction(double value, double a, double b) {
