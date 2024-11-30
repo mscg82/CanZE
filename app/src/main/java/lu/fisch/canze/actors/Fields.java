@@ -233,13 +233,39 @@ public class Fields {
     }
 
     private void addVirtualFieldSOC() {
-        addVirtualFieldCommon("6600", 1, "%", (short) 0x8ff, Collections.singletonList(Sid.AvailableEnergy), false, (dependantFields, updatedField) -> {
-            final Field energyField = dependantFields.get(Sid.AvailableEnergy);
-            if (energyField == null) {
-                return Double.NaN;
+        class SoCCalculator implements VirtualFieldAction {
+            private Double energy;
+
+            private Double temperature;
+
+            @Override
+            public double updateValue(HashMap<String, Field> dependantFields, Field updatedField) {
+                switch (updatedField.getSID()) {
+                    case Sid.AvailableEnergy:
+                        energy = updatedField.getValue();
+                        break;
+
+                    case Sid.AverageBatteryTemperature:
+                        temperature = updatedField.getValue();
+                        break;
+                }
+
+                if (energy == null || temperature == null) {
+                    return Double.NaN;
+                }
+                return computeSoCFromEnergyAndTemperature(energy, temperature);
             }
-            return computeSoCFromEnergy(energyField.getValue(), 25.0);
-        });
+
+            @Override
+            public void reset() {
+                energy = null;
+                temperature = null;
+            }
+        }
+
+        addVirtualFieldCommon("6600", 1, "%", (short) 0x8ff,
+                Arrays.asList(Sid.AvailableEnergy, Sid.AverageBatteryTemperature), false,
+                new SoCCalculator());
     }
 
     private static double computeCapacity(double temperature, double lowValue, double highValue) {
@@ -268,7 +294,7 @@ public class Fields {
     }
 
     @VisibleForTesting
-    protected static double computeSoCFromEnergy(double energy, double temperature) {
+    protected static double computeSoCFromEnergyAndTemperature(double energy, double temperature) {
         if (energy >= 45.5) {
             // linear
             return computeSoCHighEnergy(energy, temperature);
