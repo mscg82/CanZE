@@ -39,12 +39,10 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.time.Duration;
 import java.time.Instant;
-import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collections;
-import java.util.Deque;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -52,6 +50,8 @@ import java.util.concurrent.TimeUnit;
 
 import lu.fisch.canze.R;
 import lu.fisch.canze.activities.MainActivity;
+import lu.fisch.canze.actors.smoother.AverageSmoother;
+import lu.fisch.canze.actors.smoother.Smoother;
 import lu.fisch.canze.classes.Crashlytics;
 import lu.fisch.canze.classes.FieldLogger;
 import lu.fisch.canze.classes.Sid;
@@ -390,16 +390,15 @@ public class Fields {
     private void addVirtualFieldUsageByAverage() {
         class UsageByAverageAction implements VirtualFieldAction {
 
-            private static final int MAX_VALUES = 5;
-            private final Deque<Double> realSpeeds;
-            private final Deque<Double> dcPwrs;
+            private final Smoother realSpeeds;
+            private final Smoother dcPwrs;
 
             private double lastVoltage;
             private double lastCurrent;
 
             public UsageByAverageAction() {
-                this.realSpeeds = new ArrayDeque<>(MAX_VALUES);
-                this.dcPwrs = new ArrayDeque<>(MAX_VALUES);
+                this.realSpeeds = AverageSmoother.withMaxValuesAndValidity(5, Duration.ofMinutes(2));
+                this.dcPwrs = AverageSmoother.withMaxValuesAndValidity(5, Duration.ofMinutes(2));
                 emptyValues();
             }
 
@@ -417,12 +416,12 @@ public class Fields {
                         break;
 
                     case Sid.RealSpeed:
-                        appendValue(realSpeeds, MAX_VALUES, updatedField.getValue());
+                        realSpeeds.append(updatedField.getValue());
                         break;
                 }
 
-                double realSpeed = averageValues(realSpeeds);
-                double dcPwr = averageValues(dcPwrs);
+                double realSpeed = realSpeeds.smoothValue();
+                double dcPwr = dcPwrs.smoothValue();
 
                 if (Double.isNaN(dcPwr) || Double.isNaN(realSpeed)) {
                     return Double.NaN;
@@ -439,7 +438,7 @@ public class Fields {
 
             private void computePower() {
                 if (!Double.isNaN(lastCurrent) && !Double.isNaN(lastVoltage)) {
-                    appendValue(dcPwrs, MAX_VALUES, lastCurrent * lastVoltage / -1000.0);
+                    dcPwrs.append(lastCurrent * lastVoltage / -1000.0);
 
                     lastCurrent = Double.NaN;
                     lastVoltage = Double.NaN;
@@ -467,40 +466,24 @@ public class Fields {
                 true, new UsageByAverageAction());
     }
 
-    private static void appendValue(Deque<Double> values, int maxValues, double value) {
-        if (values.size() == maxValues) {
-            values.removeFirst();
-        }
-        values.addLast(value);
-    }
-
-    private static double averageValues(Deque<Double> values) {
-        return values.stream()
-                .mapToDouble(Double::doubleValue)
-                .average()
-                .orElse(0);
-    }
-
     private void addVirtualFieldUsageByIntegration() {
         // TODO
     }
 
     private void addVirtualFieldSmoothTractionBatteryVoltage() {
         class VoltageByAverageAction implements VirtualFieldAction {
-            private static final int MAX_VALUES = 10;
-
-            private final Deque<Double> voltages = new ArrayDeque<>(MAX_VALUES);
+            private final Smoother voltages = AverageSmoother.withMaxValuesAndValidity(50, Duration.ofMinutes(2));
 
             @Override
             public double updateValue(HashMap<String, Field> dependantFields, Field updatedField) {
                 //noinspection SwitchStatementWithTooFewBranches
                 switch (updatedField.getSID()) {
                     case Sid.TractionBatteryVoltage:
-                        appendValue(voltages, MAX_VALUES, updatedField.getValue());
+                        voltages.append(updatedField.getValue());
                         break;
                 }
 
-                return averageValues(voltages);
+                return voltages.smoothValue();
             }
 
             @Override
