@@ -25,6 +25,9 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.TextView;
 
+import java.time.Duration;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Locale;
 import java.util.UUID;
 
@@ -39,6 +42,9 @@ import lu.fisch.canze.mqtt.MqttValuePusher;
 // For the simple activity, the easiest way is to implement it in the activity itself.
 public class MQTTPublisherActivity extends CanzeActivity implements FieldListener, DebugListener {
 
+    private static final DateTimeFormatter LAST_READ_FORMATTER = DateTimeFormatter.ofPattern("HH:mm:ss.SSS");
+    private static final DateTimeFormatter INTERVAL_FORMATTER = DateTimeFormatter.ofPattern("mm:ss.SSS");
+
     private final String[] conditioning_Status = MainActivity.getStringList(MainActivity.isPh2() ? R.array.list_ConditioningStatusPh2
             : R.array.list_ConditioningStatus);
     private final String[] climate_Status = MainActivity.getStringList(MainActivity.isPh2() ? R.array.list_ClimateStatusPh2
@@ -46,10 +52,14 @@ public class MQTTPublisherActivity extends CanzeActivity implements FieldListene
 
     private MqttValuePusher mqttPusher;
 
+    private LocalTime lastEnergyRead;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_mqtt);
+
+        lastEnergyRead = null;
 
         if (mqttPusher != null) {
             mqttPusher.close();
@@ -187,6 +197,16 @@ public class MQTTPublisherActivity extends CanzeActivity implements FieldListene
                     break;
 
                 case Sid.AvailableEnergy:
+                    if (!Double.isNaN(field.getValue())) {
+                        LocalTime newEnergyRead = LocalTime.now();
+                        setValue(findViewById(R.id.text_energy_last_read), LAST_READ_FORMATTER.format(newEnergyRead));
+                        if (lastEnergyRead != null) {
+                            Duration interval = Duration.between(lastEnergyRead, newEnergyRead);
+                            LocalTime time = LocalTime.ofNanoOfDay(0).plus(interval);
+                            setValue(findViewById(R.id.text_energy_interval), INTERVAL_FORMATTER.format(time));
+                        }
+                        lastEnergyRead = newEnergyRead;
+                    }
                     setNumericValueFromField(findViewById(R.id.text_energy), "%.2f", field);
                     mqttPusher.pushValue(field.getSID(), field.getValue());
                     break;
@@ -209,8 +229,14 @@ public class MQTTPublisherActivity extends CanzeActivity implements FieldListene
 
     }
 
-    private void setNumericValueFromField(TextView tv, String format, Field field) {
+    private void setValue(TextView tv, String value) {
         if (tv != null) {
+            tv.setText(value);
+        }
+    }
+
+    private void setNumericValueFromField(TextView tv, String format, Field field) {
+        if (tv != null && !Double.isNaN(field.getValue())) {
             tv.setText(String.format(Locale.getDefault(), format, field.getValue()));
         }
     }

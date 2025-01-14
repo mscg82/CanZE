@@ -900,4 +900,7 @@
     <!-- ZE50 test -->
     <string name="title_activity_ZE50Test">ZE50 test</string>
 
+    <string name="energy_last_read_time">Last received value (energy):</string>
+    <string name="energy_read_interval">Value reception interval (energy):</string>
+
 </resources>

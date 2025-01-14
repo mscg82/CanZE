@@ -229,6 +229,36 @@
                 android:text="@string/default_Dash" />
 
         </TableRow>
+
+        <TableRow>
+            <TextView
+                android:layout_weight="0.7"
+                android:width="0dp"
+                android:text="@string/energy_last_read_time" />
+
+            <TextView
+                android:id="@+id/text_energy_last_read"
+                android:layout_weight="0.3"
+                android:width="0dp"
+                android:gravity="end"
+                android:text="@string/default_Dash" />
+
+        </TableRow>
+
+        <TableRow>
+            <TextView
+                android:layout_weight="0.7"
+                android:width="0dp"
+                android:text="@string/energy_read_interval" />
+
+            <TextView
+                android:id="@+id/text_energy_interval"
+                android:layout_weight="0.3"
+                android:width="0dp"
+                android:gravity="end"
+                android:text="@string/default_Dash" />
+
+        </TableRow>
     </TableLayout>
 
 
