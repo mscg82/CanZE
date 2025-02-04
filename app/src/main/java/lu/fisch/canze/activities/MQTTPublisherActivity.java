@@ -108,6 +108,8 @@ public class MQTTPublisherActivity extends CanzeActivity implements FieldListene
         addField(Sid.ClimaLoopMode, 0);
         addField(Sid.CompressorRPM, 5000);
         addField(Sid.HvTemp, 5000);
+        addField(Sid.InternalTemperature, 5000);
+        addField(Sid.ExternalTemperature, 5000);
         addField(Sid.AvailableChargingPower, 5000);
         addField(Sid.DcPowerIn, 5000);
         addField(Sid.UserSoC, 10000);
@@ -161,6 +163,16 @@ public class MQTTPublisherActivity extends CanzeActivity implements FieldListene
 
                 case Sid.HvTemp:
                     setNumericValueFromField(findViewById(R.id.text_battTemp), "%.1f", field);
+                    mqttPusher.pushValue(field.getSID(), field.getValue());
+                    break;
+
+                case Sid.ExternalTemperature:
+                    setNumericValueFromField(findViewById(R.id.text_extTemp), "%.1f", field);
+                    mqttPusher.pushValue(field.getSID(), field.getValue());
+                    break;
+
+                case Sid.InternalTemperature:
+                    setNumericValueFromField(findViewById(R.id.text_intTemp), "%.1f", field);
                     mqttPusher.pushValue(field.getSID(), field.getValue());
                     break;
 

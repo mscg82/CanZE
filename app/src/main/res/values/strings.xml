@@ -368,6 +368,8 @@
     <string name="label_UserSOC">Usable state of charge (%)</string>
     <string name="label_RealSOC">Real state of charge (%)</string>
     <string name="label_HvTemp">Mean battery temperature (°C)</string>
+    <string name="label_ExternalTemp">External temperature (°C)</string>
+    <string name="label_InternalTemp">Internal temperature (°C)</string>
     <string name="label_SOH">State of health (%)</string>
     <string name="label_TTF">Time to full (min)</string>
     <string name="label_ETF">Energy to full (kWh)</string>
