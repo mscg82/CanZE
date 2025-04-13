@@ -99,6 +99,7 @@ public class DrivingAdvancedActivity extends CanzeActivity implements FieldListe
         addField(Sid.GPS_Altitude, 5000);
         addField(Sid.UserSoC, 10000);
         addField(Sid.DisplaySOC, 10000);
+        addField(Sid.EVC_Odometer, 6000);
 
         if (MainActivity.isPh2()) {
             addField(Sid.ThermalComfortPower, 0);
@@ -195,6 +196,11 @@ public class DrivingAdvancedActivity extends CanzeActivity implements FieldListe
                 case Sid.DisplaySOC:
                     setNumericalValueFromFields(findViewById(R.id.text_SOC),
                             field, MainActivity.fields.getBySID(Sid.UserSoC));
+                    mqttPusher.pushValue(field.getSID(), field.getValue());
+                    break;
+
+                case Sid.EVC_Odometer:
+                    setNumericValueFromField(findViewById(R.id.text_odometer), field);
                     mqttPusher.pushValue(field.getSID(), field.getValue());
                     break;
 

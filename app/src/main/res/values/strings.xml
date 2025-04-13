@@ -46,9 +46,9 @@
     <string name="default_debug">#Debug</string>
 
     <string name="label_debug_mqtt">MQTT\u0020</string>
-    <string name="default_debug_mqtt">#MQTT</string>
-    <string name="default_debug_mqtt_connected">Connected</string>
-    <string name="default_debug_mqtt_disconnected">Disconnected</string>
+    <string name="default_debug_mqtt">-</string>
+    <string name="default_debug_mqtt_connected">✔</string>
+    <string name="default_debug_mqtt_disconnected">✖</string>
 
     <!-- *************************** SELECTION SCREENS (MAIN AND FRAGMENTS) *************************** -->
 

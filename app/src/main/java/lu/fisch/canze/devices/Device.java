@@ -264,7 +264,7 @@ public abstract class Device {
                 } else {
                     // long start = Calendar.getInstance().getTimeInMillis();
                     // MainActivity.debug("Device: queryNextFilter: " + field.getSID());
-                    MainActivity.getInstance().dropDebugMessage(field.getSID());
+                    MainActivity.getInstance().dropDebugFieldMessage(field.getSID());
 
                     // get the data
                     Message message = requestFrame(field.getFrame());

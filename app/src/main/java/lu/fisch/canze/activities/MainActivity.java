@@ -82,6 +82,7 @@ import lu.fisch.canze.classes.Crashlytics;
 import lu.fisch.canze.classes.DataLogger;
 import lu.fisch.canze.classes.DebugLogger;
 import lu.fisch.canze.classes.ForegroundCheckTask;
+import lu.fisch.canze.classes.Sid;
 import lu.fisch.canze.database.CanzeDataSource;
 import lu.fisch.canze.devices.CanSee;
 import lu.fisch.canze.devices.Device;
@@ -1281,6 +1282,10 @@ public class MainActivity extends AppCompatActivity implements FieldListener /*,
 
     public void dropDebugMessage(String msg) {
         if (debugListener != null) debugListener.dropDebugMessage(msg);
+    }
+
+    public void dropDebugFieldMessage(String msg) {
+        if (debugListener != null) debugListener.dropDebugMessage(Sid.completeSidWithName(msg));
     }
 
     public void appendDebugMessage(String msg) {

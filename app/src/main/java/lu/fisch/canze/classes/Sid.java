@@ -1,5 +1,12 @@
 package lu.fisch.canze.classes;
 
+import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
+import java.util.Arrays;
+import java.util.Map;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
 public class Sid {
 
 
@@ -145,4 +152,37 @@ public class Sid {
     public static final String CCSEVSEMaxCurrent                    = "18daf1da.62300a.24";
 
     public static final String Total_Regen_kWh                      = "18daf1db.629247.24"; // Ph2 only (for now)
+
+    private static final Map<String, String> sidToName;
+
+    static {
+        Field[] publicFields = Sid.class.getFields();
+        sidToName = Arrays.stream(publicFields) //
+                .filter(field -> Modifier.isStatic(field.getModifiers())) //
+                .filter(field -> Modifier.isFinal(field.getModifiers())) //
+                .flatMap(field -> {
+                    Object value;
+                    try {
+                        value = field.get(null);
+                    } catch (IllegalAccessException e) {
+                        throw new RuntimeException(e);
+                    }
+                    if (value instanceof String) {
+                        return Stream.of(Map.entry((String) value, field.getName()));
+                    }
+                    return Stream.empty();
+                })
+                .collect(Collectors.groupingBy(Map.Entry::getKey,
+                        Collectors.mapping(Map.Entry::getValue, Collectors.joining("/"))));
+    }
+
+    public static String completeSidWithName(String sid)
+    {
+        String name = sidToName.get(sid);
+        if (name != null) {
+            return sid + " - " + name;
+        }
+
+        return sid;
+    }
 }
