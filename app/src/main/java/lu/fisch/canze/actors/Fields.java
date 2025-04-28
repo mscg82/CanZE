@@ -269,12 +269,12 @@ public class Fields {
     }
 
     private static double computeCapacity(double temperature, double lowValue, double highValue) {
-        if (temperature >= 20.2) {
+        if (temperature >= 22.0) {
             return highValue;
         }
 
-        if (temperature >= 19.8) {
-            double phi = computeStepFunction(temperature, 19.8, 20.2);
+        if (temperature >= 20.5) {
+            double phi = computeStepFunction(temperature, 20.5, 22.0);
             return (1 - phi) * lowValue + phi * highValue;
         }
 
