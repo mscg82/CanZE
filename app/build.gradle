@@ -13,6 +13,10 @@ android {
     }
     compileSdk 34
 
+    buildFeatures {
+        buildConfig true
+    }
+
     defaultConfig {
         applicationId "lu.fisch.canze.mscg"
         minSdkVersion 26
@@ -23,7 +27,7 @@ android {
         release {
         //  minifyEnabled false
         //  minifyEnabled true
-            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        //    proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
         //debug {
         //    minifyEnabled true
