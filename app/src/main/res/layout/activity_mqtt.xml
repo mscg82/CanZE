@@ -261,6 +261,21 @@
             <TextView
                 android:layout_weight="0.7"
                 android:width="0dp"
+                android:text="@string/label_SOH" />
+
+            <TextView
+                android:id="@+id/textSOH"
+                android:layout_weight="0.3"
+                android:width="0dp"
+                android:gravity="end"
+                android:text="@string/default_Dash" />
+
+        </TableRow>
+
+        <TableRow>
+            <TextView
+                android:layout_weight="0.7"
+                android:width="0dp"
                 android:text="@string/label_AvEner" />
 
             <TextView

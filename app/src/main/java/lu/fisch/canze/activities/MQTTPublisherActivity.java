@@ -120,6 +120,7 @@ public class MQTTPublisherActivity extends CanzeActivity implements FieldListene
         addField(Sid.TractionBatteryVoltage, 5000);
         addField(Sid.SmoothTractionBatteryVoltage, 5000);
         addField(Sid.EVC_Odometer, 6000);
+        addField(Sid.SOH, 5000);
         if (MainActivity.mqttTestEnabled) {
             addField(Sid.TestField1, 0);
         }
@@ -236,6 +237,11 @@ public class MQTTPublisherActivity extends CanzeActivity implements FieldListene
 
                 case Sid.EVC_Odometer:
                     setNumericValueFromField(findViewById(R.id.text_odometer), "%.2f", field);
+                    mqttPusher.pushValue(field.getSID(), field.getValue());
+                    break;
+
+                case Sid.SOH:
+                    setNumericValueFromField(findViewById(R.id.textSOH), "%.2f", field);
                     mqttPusher.pushValue(field.getSID(), field.getValue());
                     break;
 

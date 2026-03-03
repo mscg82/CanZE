@@ -100,6 +100,7 @@ public class DrivingAdvancedActivity extends CanzeActivity implements FieldListe
         addField(Sid.UserSoC, 10000);
         addField(Sid.DisplaySOC, 10000);
         addField(Sid.EVC_Odometer, 6000);
+        addField(Sid.SOH, 5000);
 
         if (MainActivity.isPh2()) {
             addField(Sid.ThermalComfortPower, 0);
@@ -214,6 +215,7 @@ public class DrivingAdvancedActivity extends CanzeActivity implements FieldListe
                 case Sid.DcPowerIn:
                 case Sid.InternalTemperature:
                 case Sid.ExternalTemperature:
+                case Sid.SOH:
                     mqttPusher.pushValue(field.getSID(), field.getValue());
                     break;
             }

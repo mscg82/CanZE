@@ -18,7 +18,7 @@ public class FieldsTest {
 
         double[] socs = new double[energies.length];
         for (int i = 0; i < energies.length; i++) {
-            socs[i] = Fields.computeSoCFromEnergyAndTemperature(energies[i], 25.0);
+            socs[i] = Fields.computeSoCFromEnergyAndTemperatureAndSoh(energies[i], 25.0, 1.0);
         }
 
         printValuesForPlotting(energies, socs);
@@ -36,7 +36,7 @@ public class FieldsTest {
 
         double[] socs = new double[energies.length];
         for (int i = 0; i < energies.length; i++) {
-            socs[i] = Fields.computeSoCFromEnergyAndTemperature(energies[i], 25.0);
+            socs[i] = Fields.computeSoCFromEnergyAndTemperatureAndSoh(energies[i], 25.0, 1.0);
         }
 
         printValuesForPlotting(energies, socs);
