@@ -259,7 +259,15 @@ public class Fields {
                 if (energy == null || temperature == null) {
                     return Double.NaN;
                 }
-                return computeSoCFromEnergyAndTemperatureAndSoh(energy, temperature, soh);
+
+                final double sohToUse;
+                if (MainActivity.useSOHForDisplaySOC) {
+                    sohToUse = soh;
+                } else {
+                    sohToUse = 1.0;
+                }
+
+                return computeSoCFromEnergyAndTemperatureAndSoh(energy, temperature, sohToUse);
             }
 
             @Override

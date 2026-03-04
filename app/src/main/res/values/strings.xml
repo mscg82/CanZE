@@ -848,6 +848,9 @@
     <string name="label_MQTT_uri">MQTT broker connection URI</string>
     <string name="label_MQTT_username">MQTT broker username</string>
     <string name="label_MQTT_password">MQTT broker password</string>
+    <string name="label_custom_sensors">Custom sensors</string>
+    <string name="label_use_soh_in_display_soc">Use SOH to estimate SOC</string>
+    <string name="label_use_soh_in_display_soc_Desc">This will allow to compute the display SOC by taking into account also the battery SOH</string>
 
     <!-- SettingsCustom -->
 

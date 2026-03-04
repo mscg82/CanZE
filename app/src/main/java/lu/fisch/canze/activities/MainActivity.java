@@ -180,6 +180,8 @@ public class MainActivity extends AppCompatActivity implements FieldListener /*,
     public static String mqttConnectionUsername = null;
     public static char[] mqttConnectionPassword = null;
 
+    public static boolean useSOHForDisplaySOC = false;
+
     // use "debugLogMode" instead
     //public static boolean dataExportMode = false;
     public static DataLogger dataLogger = null; // rather use singleton in onCreate
@@ -374,6 +376,8 @@ public class MainActivity extends AppCompatActivity implements FieldListener /*,
                     .filter(s -> !s.isEmpty())
                     .map(String::toCharArray)
                     .orElse(null);
+
+            useSOHForDisplaySOC = settings.getBoolean(SettingsActivity.USE_SOH_FOR_DISPLAY_SOC, false);
 
             if (bluetoothDeviceName != null && !bluetoothDeviceName.isEmpty() && bluetoothDeviceName.length() > 4)
                 BluetoothManager.getInstance().setDummyMode(bluetoothDeviceName.substring(0, 4).compareTo("HTTP") == 0);

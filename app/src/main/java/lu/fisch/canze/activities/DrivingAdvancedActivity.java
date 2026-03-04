@@ -63,6 +63,12 @@ public class DrivingAdvancedActivity extends CanzeActivity implements FieldListe
         String unit = MainActivity.getStringSingle(MainActivity.milesMode ? R.string.unit_ConsumptionMiAlt : R.string.label_kWh100km);
         tv.setText(String.format("%s (%s)", baseLabel, unit));
 
+        TextView socLabel = findViewById(R.id.text_SOC_label);
+        socLabel.setText(MainActivity.getStringSingle(R.string.graph_RealIndicatedSoc));
+        if (MainActivity.useSOHForDisplaySOC) {
+            socLabel.append(" *");
+        }
+
         if (mqttPusher != null) {
             mqttPusher.close();
         }

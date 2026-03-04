@@ -149,6 +149,16 @@
     </PreferenceCategory>
 
     <PreferenceCategory
+        app:title="@string/label_custom_sensors"
+        app:iconSpaceReserved="false">
+        <SwitchPreference
+            app:iconSpaceReserved="false"
+            app:key="useSOHForDisplaySOC"
+            app:summary="@string/label_use_soh_in_display_soc_Desc"
+            app:title="@string/label_use_soh_in_display_soc" />
+    </PreferenceCategory>
+
+    <PreferenceCategory
         app:title="@string/label_Actions"
         app:iconSpaceReserved="false">
         <Preference

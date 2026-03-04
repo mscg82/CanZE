@@ -61,6 +61,12 @@ public class MQTTPublisherActivity extends CanzeActivity implements FieldListene
 
         lastEnergyRead = null;
 
+        TextView socLabel = findViewById(R.id.text_disp_soc_label);
+        socLabel.setText(MainActivity.getStringSingle(R.string.label_StateOfCharge));
+        if (MainActivity.useSOHForDisplaySOC) {
+            socLabel.append(" *");
+        }
+
         if (mqttPusher != null) {
             mqttPusher.close();
         }

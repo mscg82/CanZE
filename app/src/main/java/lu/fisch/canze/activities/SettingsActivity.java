@@ -120,6 +120,9 @@ public class SettingsActivity extends AppCompatActivity {
     public static final String MQTT_BROKER_USERNAME = "mqttUsername";
     public static final String MQTT_BROKER_PASSWORD = "mqttPassword";
 
+    // Custom sensors configurations
+    public static final String USE_SOH_FOR_DISPLAY_SOC = "useSOHForDisplaySOC";
+
     // Car models
     public static final CharSequence[] CAR_MODELS_LABELS = {
             "ZOE Q210",
