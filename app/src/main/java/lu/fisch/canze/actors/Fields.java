@@ -238,7 +238,7 @@ public class Fields {
 
             private Double temperature;
 
-            private double soh = 1.0;
+            private Double soh;
 
             @Override
             public double updateValue(HashMap<String, Field> dependantFields, Field updatedField) {
@@ -255,19 +255,19 @@ public class Fields {
                         soh = updatedField.getValue() / 100.0;
                         break;
                 }
-
-                if (energy == null || temperature == null) {
-                    return Double.NaN;
-                }
-
-                final double sohToUse;
                 if (MainActivity.useSOHForDisplaySOC) {
-                    sohToUse = soh;
-                } else {
-                    sohToUse = 1.0;
-                }
+                    if (energy == null || temperature == null || soh == null) {
+                        return Double.NaN;
+                    }
 
-                return computeSoCFromEnergyAndTemperatureAndSoh(energy, temperature, sohToUse);
+                    return computeSoCFromEnergyAndTemperatureAndSoh(energy, temperature, soh);
+                } else {
+                    if (energy == null || temperature == null) {
+                        return Double.NaN;
+                    }
+
+                    return computeSoCFromEnergyAndTemperature(energy, temperature);
+                }
             }
 
             @Override
@@ -282,7 +282,7 @@ public class Fields {
                 new SoCCalculator());
     }
 
-    private static double computeCapacity(double temperature, double lowValue, double highValue, double soh) {
+    private static double computeCapacity(double temperature, double lowValue, double highValue) {
         final double capacity;
         if (temperature >= 22.0) {
             capacity = highValue;
@@ -293,47 +293,63 @@ public class Fields {
             capacity = lowValue;
         }
 
-        return capacity * soh;
+        return capacity;
     }
 
-    private static double computeSoCLowEnergy(double e, double temperature, double soh) {
-        return Math.min(e * (100.0 / computeCapacity(temperature, 50.0, 52.5, soh)), 100.0);
+    private static double computeSoCLowEnergy(double e, double temperature) {
+        return Math.min(e * (100.0 / computeCapacity(temperature, 50.0, 52.5)), 100.0);
     }
 
-    private static double computeSoCMidEnergy(double e, double temperature, double soh) {
-        return Math.min(e * (100.0 / computeCapacity(temperature, 49.5, 51.5, soh)), 100.0);
+    private static double computeSoCMidEnergy(double e, double temperature) {
+        return Math.min(e * (100.0 / computeCapacity(temperature, 49.5, 51.5)), 100.0);
     }
 
-    private static double computeSoCHighEnergy(double e, double temperature, double soh) {
-        return Math.min(e * (100.0 / computeCapacity(temperature, 49.0, 50.5, soh)), 100.0);
+    private static double computeSoCHighEnergy(double e, double temperature) {
+        return Math.min(e * (100.0 / computeCapacity(temperature, 49.0, 50.5)), 100.0);
     }
 
     @VisibleForTesting
     protected static double computeSoCFromEnergyAndTemperatureAndSoh(double energy, double temperature, double soh) {
+        // The constants used in the following evaluation have been extrapolated by Claude,
+        // analyzing records of data-points extract from a real car.
+
+        double NOMINAL = 52.0; // kWh, nominal capacity
+        double ETA = 0.96317; // % of the SOH-adjusted capacity is counted as 0-100 %
+        double B = -0.06801; // kWh per degC
+        double C = 0.35317; // kWh, energy offset
+
+        double usable = ETA * NOMINAL * soh;
+        double soc = 100 * (energy + B * temperature + C) / usable;
+
+        return Math.min(100.0, Math.max(0.0, soc)); // clamp the result between 0% and 100%
+    }
+
+    @VisibleForTesting
+    protected static double computeSoCFromEnergyAndTemperature(double energy, double temperature) {
         if (energy >= 45.5) {
             // linear
-            return computeSoCHighEnergy(energy, temperature, soh);
+            return computeSoCHighEnergy(energy, temperature);
         }
 
         if (energy >= 43.5) {
             // interpolation around 44.5
             double phi = computeStepFunction(energy, 43.5, 45.5);
-            return Math.min((1 - phi) * computeSoCMidEnergy(energy, temperature, soh) + phi * computeSoCHighEnergy(energy, temperature, soh), 100.0);
+            return Math.min((1 - phi) * computeSoCMidEnergy(energy, temperature) + phi * computeSoCHighEnergy(energy, temperature), 100.0);
         }
 
         if (energy >= 27.5) {
             // linear
-            return computeSoCMidEnergy(energy, temperature, soh);
+            return computeSoCMidEnergy(energy, temperature);
         }
 
         if (energy >= 25.5) {
             // interpolation around 26.5
             double phi = computeStepFunction(energy, 25.5, 27.5);
-            return Math.min((1 - phi) * computeSoCLowEnergy(energy, temperature, soh) + phi * computeSoCMidEnergy(energy, temperature, soh), 100.0);
+            return Math.min((1 - phi) * computeSoCLowEnergy(energy, temperature) + phi * computeSoCMidEnergy(energy, temperature), 100.0);
         }
 
         // linear
-        return computeSoCLowEnergy(energy, temperature, soh);
+        return computeSoCLowEnergy(energy, temperature);
     }
 
     private static double computeStepFunction(double value, double a, double b) {

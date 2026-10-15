@@ -9,8 +9,7 @@ import java.util.stream.Collectors;
 public class FieldsTest {
 
     @Test
-    public void smoothAround445()
-    {
+    public void smoothAround445() {
         double[] energies = new double[501];
         for (int i = 0; i < energies.length; i++) {
             energies[i] = 3.0 * (i / (double) (energies.length - 1)) + 43;
@@ -18,7 +17,7 @@ public class FieldsTest {
 
         double[] socs = new double[energies.length];
         for (int i = 0; i < energies.length; i++) {
-            socs[i] = Fields.computeSoCFromEnergyAndTemperatureAndSoh(energies[i], 25.0, 1.0);
+            socs[i] = Fields.computeSoCFromEnergyAndTemperature(energies[i], 25.0);
         }
 
         printValuesForPlotting(energies, socs);
@@ -27,8 +26,7 @@ public class FieldsTest {
     }
 
     @Test
-    public void smoothAround265()
-    {
+    public void smoothAround265() {
         double[] energies = new double[501];
         for (int i = 0; i < energies.length; i++) {
             energies[i] = 3.0 * (i / (double) (energies.length - 1)) + 25;
@@ -36,12 +34,23 @@ public class FieldsTest {
 
         double[] socs = new double[energies.length];
         for (int i = 0; i < energies.length; i++) {
-            socs[i] = Fields.computeSoCFromEnergyAndTemperatureAndSoh(energies[i], 25.0, 1.0);
+            socs[i] = Fields.computeSoCFromEnergyAndTemperature(energies[i], 25.0);
         }
 
         printValuesForPlotting(energies, socs);
 
         assertSmoothness(socs, energies);
+    }
+
+    @Test
+    public void test_estimationThroughSoH_shouldGiveMeaningfulResults() {
+        double computedSoc = Fields.computeSoCFromEnergyAndTemperatureAndSoh(35.0, 22.0, 0.9458);
+        Assert.assertTrue("Expected value was around 71.5, but was " + computedSoc,
+                Math.abs(71.5 - computedSoc) < 0.1);
+
+        computedSoc = Fields.computeSoCFromEnergyAndTemperatureAndSoh(34.01, 24.75, 0.9457);
+        Assert.assertTrue("Expected value was around 69.5, but was " + computedSoc,
+                Math.abs(69 - computedSoc) < 0.1);
     }
 
     private void printValuesForPlotting(double[] energies, double[] socs) {
