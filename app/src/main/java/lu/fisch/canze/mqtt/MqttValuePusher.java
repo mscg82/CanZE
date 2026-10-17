@@ -31,6 +31,22 @@ public class MqttValuePusher implements AutoCloseable {
     private final AtomicReference<Future<?>> reconnectAction;
     private final Consumer<Boolean> mqttConnectionListener;
 
+    public static void pushValue(MqttValuePusher mqttPusher, String sid, double value) {
+        if (mqttPusher == null) {
+            Log.d(MainActivity.TAG, "MQTT pusher instance was null, ignoring push");
+            return;
+        }
+        mqttPusher.pushValue(sid, value);
+    }
+
+    public static void pushValue(MqttValuePusher mqttPusher, String sid, String value) {
+        if (mqttPusher == null) {
+            Log.d(MainActivity.TAG, "MQTT pusher instance was null, ignoring push");
+            return;
+        }
+        mqttPusher.pushValue(sid, value);
+    }
+
     public MqttValuePusher(String publisherId, Consumer<Boolean> mqttConnectionListener) {
         this(publisherId,
                 MainActivity.mqttConnectionUri, MainActivity.mqttConnectionUsername, MainActivity.mqttConnectionPassword,

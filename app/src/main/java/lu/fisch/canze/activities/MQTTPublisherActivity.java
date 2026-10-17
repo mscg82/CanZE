@@ -144,75 +144,75 @@ public class MQTTPublisherActivity extends CanzeActivity implements FieldListene
             switch (field.getSID()) {
                 case Sid.EngineFanSpeed:
                     setNumericValueFromField(findViewById(R.id.text_EFS), "%.1f", field);
-                    mqttPusher.pushValue(field.getSID(), field.getValue());
+                    MqttValuePusher.pushValue(mqttPusher, field.getSID(), field.getValue());
                     break;
 
                 case Sid.ThermalComfortPower:
                     setNumericValueFromField(findViewById(R.id.text_ClimatePower), "%.1f", field);
-                    mqttPusher.pushValue(field.getSID(), field.getValue());
+                    MqttValuePusher.pushValue(mqttPusher, field.getSID(), field.getValue());
                     break;
 
                 case Sid.BatteryConditioningMode: {
                     String setValue = setTextValueFromField(findViewById(R.id.text_HCM), conditioning_Status, field);
-                    mqttPusher.pushValue(field.getSID(), setValue);
+                    MqttValuePusher.pushValue(mqttPusher, field.getSID(), setValue);
                     break;
                 }
 
                 case Sid.ClimaLoopMode: {
                     String setValue = setTextValueFromField(findViewById(R.id.text_CLM), climate_Status, field);
-                    mqttPusher.pushValue(field.getSID(), setValue);
+                    MqttValuePusher.pushValue(mqttPusher, field.getSID(), setValue);
                     break;
                 }
 
                 case Sid.CompressorRPM:
                     setNumericValueFromField(findViewById(R.id.text_CRPM), "%.0f", field);
-                    mqttPusher.pushValue(field.getSID(), field.getValue());
+                    MqttValuePusher.pushValue(mqttPusher, field.getSID(), field.getValue());
                     break;
 
                 case Sid.HvTemp:
                     setNumericValueFromField(findViewById(R.id.text_battTemp), "%.1f", field);
-                    mqttPusher.pushValue(field.getSID(), field.getValue());
+                    MqttValuePusher.pushValue(mqttPusher, field.getSID(), field.getValue());
                     break;
 
                 case Sid.ExternalTemperature:
                     setNumericValueFromField(findViewById(R.id.text_extTemp), "%.1f", field);
-                    mqttPusher.pushValue(field.getSID(), field.getValue());
+                    MqttValuePusher.pushValue(mqttPusher, field.getSID(), field.getValue());
                     break;
 
                 case Sid.InternalTemperature:
                     setNumericValueFromField(findViewById(R.id.text_intTemp), "%.1f", field);
-                    mqttPusher.pushValue(field.getSID(), field.getValue());
+                    MqttValuePusher.pushValue(mqttPusher, field.getSID(), field.getValue());
                     break;
 
                 case Sid.AvailableChargingPower:
                     setNumericValueFromField(findViewById(R.id.text_chgPwr), "%.1f", field);
-                    mqttPusher.pushValue(field.getSID(), field.getValue());
+                    MqttValuePusher.pushValue(mqttPusher, field.getSID(), field.getValue());
                     break;
 
                 case Sid.DcPowerIn:
                     setNumericValueFromField(findViewById(R.id.text_dcPwr), "%.1f", field);
-                    mqttPusher.pushValue(field.getSID(), field.getValue());
+                    MqttValuePusher.pushValue(mqttPusher, field.getSID(), field.getValue());
                     break;
 
                 case Sid.UserSoC:
                     setNumericValueFromField(findViewById(R.id.text_usable_soc), "%.1f", field);
-                    mqttPusher.pushValue(field.getSID(), field.getValue());
+                    MqttValuePusher.pushValue(mqttPusher, field.getSID(), field.getValue());
                     break;
 
                 case Sid.RealSoC:
                     setNumericValueFromField(findViewById(R.id.text_real_soc), "%.1f", field);
-                    mqttPusher.pushValue(field.getSID(), field.getValue());
+                    MqttValuePusher.pushValue(mqttPusher, field.getSID(), field.getValue());
                     break;
 
                 case Sid.DisplaySOC:
                     setNumericValueFromField(findViewById(R.id.text_disp_soc), "%.1f", field);
-                    mqttPusher.pushValue(field.getSID(), field.getValue());
+                    MqttValuePusher.pushValue(mqttPusher, field.getSID(), field.getValue());
                     break;
 
                 case Sid.GroundResistance:
                     setNumericValueFromField(findViewById(R.id.text_ground), "%.0f", field);
                     if (field.getValue() > 0.5) {
-                        mqttPusher.pushValue(field.getSID(), field.getValue());
+                        MqttValuePusher.pushValue(mqttPusher, field.getSID(), field.getValue());
                     }
                     break;
 
@@ -228,31 +228,31 @@ public class MQTTPublisherActivity extends CanzeActivity implements FieldListene
                         lastEnergyRead = newEnergyRead;
                     }
                     setNumericValueFromField(findViewById(R.id.text_energy), "%.2f", field);
-                    mqttPusher.pushValue(field.getSID(), field.getValue());
+                    MqttValuePusher.pushValue(mqttPusher, field.getSID(), field.getValue());
                     break;
 
                 case Sid.TractionBatteryVoltage:
                     setNumericValueFromField(findViewById(R.id.text_volt), "%.2f", field);
-                    mqttPusher.pushValue(field.getSID(), field.getValue());
+                    MqttValuePusher.pushValue(mqttPusher, field.getSID(), field.getValue());
                     break;
 
                 case Sid.SmoothTractionBatteryVoltage:
                     setNumericValueFromField(findViewById(R.id.text_volt_smooth), "%.2f", field);
-                    mqttPusher.pushValue(field.getSID(), field.getValue());
+                    MqttValuePusher.pushValue(mqttPusher, field.getSID(), field.getValue());
                     break;
 
                 case Sid.EVC_Odometer:
                     setNumericValueFromField(findViewById(R.id.text_odometer), "%.2f", field);
-                    mqttPusher.pushValue(field.getSID(), field.getValue());
+                    MqttValuePusher.pushValue(mqttPusher, field.getSID(), field.getValue());
                     break;
 
                 case Sid.SOH:
                     setNumericValueFromField(findViewById(R.id.textSOH), "%.2f", field);
-                    mqttPusher.pushValue(field.getSID(), field.getValue());
+                    MqttValuePusher.pushValue(mqttPusher, field.getSID(), field.getValue());
                     break;
 
                 case Sid.TestField1:
-                    mqttPusher.pushValue(field.getSID(), field.getValue());
+                    MqttValuePusher.pushValue(mqttPusher, field.getSID(), field.getValue());
                     break;
             }
         });

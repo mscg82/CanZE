@@ -145,7 +145,7 @@ public class DrivingAdvancedActivity extends CanzeActivity implements FieldListe
 
                 case Sid.EngineFanSpeed:
                     setNumericValueFromField(findViewById(R.id.text_EFS), field);
-                    mqttPusher.pushValue(field.getSID(), field.getValue());
+                    MqttValuePusher.pushValue(mqttPusher, field.getSID(), field.getValue());
                     break;
 
                 case Sid.InstantConsumptionByAverage:
@@ -155,17 +155,17 @@ public class DrivingAdvancedActivity extends CanzeActivity implements FieldListe
                             val -> Double.isNaN(val) ?
                                     Optional.of(MainActivity.getStringSingle(R.string.default_Dash)) :
                                     Optional.empty());
-                    mqttPusher.pushValue(field.getSID(), field.getValue());
+                    MqttValuePusher.pushValue(mqttPusher, field.getSID(), field.getValue());
                     break;
 
                 case Sid.ThermalComfortPower:
                     setNumericValueFromField(findViewById(R.id.text_ClimatePower), field);
-                    mqttPusher.pushValue(field.getSID(), field.getValue());
+                    MqttValuePusher.pushValue(mqttPusher, field.getSID(), field.getValue());
                     break;
 
                 case Sid.HvCoolingState: {
                     String setValue = setTextValueFromField(findViewById(R.id.text_HCS), cooling_Status, field);
-                    mqttPusher.pushValue(field.getSID(), setValue);
+                    MqttValuePusher.pushValue(mqttPusher, field.getSID(), setValue);
                     break;
                 }
 
@@ -179,36 +179,36 @@ public class DrivingAdvancedActivity extends CanzeActivity implements FieldListe
 
                 case Sid.BatteryConditioningMode: {
                     String setValue = setTextValueFromField(findViewById(R.id.text_HCM), conditioning_Status, field);
-                    mqttPusher.pushValue(field.getSID(), setValue);
+                    MqttValuePusher.pushValue(mqttPusher, field.getSID(), setValue);
                     break;
                 }
 
                 case Sid.ClimaLoopMode: {
                     String setValue = setTextValueFromField(findViewById(R.id.text_CLM), climate_Status, field);
-                    mqttPusher.pushValue(field.getSID(), setValue);
+                    MqttValuePusher.pushValue(mqttPusher, field.getSID(), setValue);
                     break;
                 }
 
                 case Sid.GPS_Altitude:
                     setNumericValueFromField(findViewById(R.id.text_altitude), field);
-                    mqttPusher.pushValue(field.getSID(), field.getValue());
+                    MqttValuePusher.pushValue(mqttPusher, field.getSID(), field.getValue());
                     break;
 
                 case Sid.UserSoC:
                     setNumericalValueFromFields(findViewById(R.id.text_SOC),
                             MainActivity.fields.getBySID(Sid.DisplaySOC), field);
-                    mqttPusher.pushValue(field.getSID(), field.getValue());
+                    MqttValuePusher.pushValue(mqttPusher, field.getSID(), field.getValue());
                     break;
 
                 case Sid.DisplaySOC:
                     setNumericalValueFromFields(findViewById(R.id.text_SOC),
                             field, MainActivity.fields.getBySID(Sid.UserSoC));
-                    mqttPusher.pushValue(field.getSID(), field.getValue());
+                    MqttValuePusher.pushValue(mqttPusher, field.getSID(), field.getValue());
                     break;
 
                 case Sid.EVC_Odometer:
                     setNumericValueFromField(findViewById(R.id.text_odometer), field);
-                    mqttPusher.pushValue(field.getSID(), field.getValue());
+                    MqttValuePusher.pushValue(mqttPusher, field.getSID(), field.getValue());
                     break;
 
                 case Sid.AvailableEnergy:
@@ -222,7 +222,7 @@ public class DrivingAdvancedActivity extends CanzeActivity implements FieldListe
                 case Sid.InternalTemperature:
                 case Sid.ExternalTemperature:
                 case Sid.SOH:
-                    mqttPusher.pushValue(field.getSID(), field.getValue());
+                    MqttValuePusher.pushValue(mqttPusher, field.getSID(), field.getValue());
                     break;
             }
         });
