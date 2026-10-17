@@ -46,11 +46,11 @@ public class FieldsTest {
     public void test_estimationThroughSoH_shouldGiveMeaningfulResults() {
         double computedSoc = Fields.computeSoCFromEnergyAndTemperatureAndSoh(35.0, 22.0, 0.9458);
         Assert.assertTrue("Expected value was around 71.5, but was " + computedSoc,
-                Math.abs(71.5 - computedSoc) < 0.1);
+                Math.abs(71.5 - computedSoc) < 0.02);
 
         computedSoc = Fields.computeSoCFromEnergyAndTemperatureAndSoh(34.01, 24.75, 0.9457);
-        Assert.assertTrue("Expected value was around 69.5, but was " + computedSoc,
-                Math.abs(69 - computedSoc) < 0.1);
+        Assert.assertTrue("Expected value was around 69, but was " + computedSoc,
+                Math.abs(69 - computedSoc) < 0.02);
     }
 
     private void printValuesForPlotting(double[] energies, double[] socs) {

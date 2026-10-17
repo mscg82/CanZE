@@ -311,17 +311,18 @@ public class Fields {
     @VisibleForTesting
     protected static double computeSoCFromEnergyAndTemperatureAndSoh(double energy, double temperature, double soh) {
         // The constants used in the following evaluation have been extrapolated by Claude,
-        // analyzing records of data-points extract from a real car.
+        // analyzing records of data-points extracted from a real car.
+        // Temperature acts on how much each kWh counts: a warmer pack counts each kWh slightly less.
 
-        double NOMINAL = 52.0; // kWh, nominal capacity
-        double ETA = 0.96317; // % of the SOH-adjusted capacity is counted as 0-100 %
-        double B = -0.06801; // kWh per degC
-        double C = 0.35317; // kWh, energy offset
+        double NOMINAL = 52.0;    // kWh, nominal pack capacity
+        double A = 1.08867;       // weight of each kWh of available energy at 0 degC
+        double B = -0.002089;     // change of that weight per degC
+        double C = -1.3300;       // kWh, energy offset
 
-        double usable = ETA * NOMINAL * soh;
-        double soc = 100 * (energy + B * temperature + C) / usable;
+        double usable = NOMINAL * soh;                                    // soh as a fraction, e.g. 0.9456
+        double soc = 100 * (energy * (A + B * temperature) + C) / usable;
 
-        return Math.min(100.0, Math.max(0.0, soc)); // clamp the result between 0% and 100%
+        return Math.min(100.0, Math.max(0.0, soc));                       // clamp the result between 0% and 100%
     }
 
     @VisibleForTesting
